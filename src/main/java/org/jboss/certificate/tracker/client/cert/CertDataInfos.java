@@ -17,44 +17,17 @@
 //--- END COPYRIGHT BLOCK ---
 package org.jboss.certificate.tracker.client.cert;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "CertDataInfos")
-public class CertDataInfos {
+public class CertDataInfos extends DataCollection<CertDataInfo> {
 
-    Integer total;
-    Collection<CertDataInfo> entries = new ArrayList<CertDataInfo>();
-
-    public Integer getTotal() {
-        return total;
-    }
-
-    public void setTotal(Integer total) {
-        this.total = total;
-    }
-
+    @Override
     @XmlElementRef
     public Collection<CertDataInfo> getEntries() {
-        return entries;
+        return super.getEntries();
     }
-
-    public void setEntries(Collection<CertDataInfo> entries) {
-        this.entries.clear();
-        if (entries == null)
-            return;
-        this.entries.addAll(entries);
-    }
-
-    public void addEntry(CertDataInfo entry) {
-        entries.add(entry);
-    }
-
-    public void removeEntry(CertDataInfo entry) {
-        entries.remove(entry);
-    }
-
 }

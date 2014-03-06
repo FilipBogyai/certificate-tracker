@@ -32,6 +32,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.jboss.resteasy.plugins.providers.atom.Link;
 
 /**
  * @author alee
@@ -65,6 +66,8 @@ public class CertDataInfo {
     Date notValidAfter;
     Date issuedOn;
     String issuedBy;
+
+    Link link;
 
     @XmlAttribute(name="id")
     @XmlJavaTypeAdapter(CertIdAdapter.class)
@@ -169,6 +172,15 @@ public class CertDataInfo {
         this.issuedBy = issuedBy;
     }
 
+    @XmlElement(name = "Link")
+    public Link getLink() {
+        return link;
+    }
+
+    public void setLink(Link link) {
+        this.link = link;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -178,6 +190,7 @@ public class CertDataInfo {
         result = prime * result + ((issuedOn == null) ? 0 : issuedOn.hashCode());
         result = prime * result + ((keyAlgorithmOID == null) ? 0 : keyAlgorithmOID.hashCode());
         result = prime * result + ((keyLength == null) ? 0 : keyLength.hashCode());
+        result = prime * result + ((link == null) ? 0 : link.hashCode());
         result = prime * result + ((notValidAfter == null) ? 0 : notValidAfter.hashCode());
         result = prime * result + ((notValidBefore == null) ? 0 : notValidBefore.hashCode());
         result = prime * result + ((status == null) ? 0 : status.hashCode());
@@ -221,7 +234,11 @@ public class CertDataInfo {
                 return false;
         } else if (!keyLength.equals(other.keyLength))
             return false;
-
+        if (link == null) {
+            if (other.link != null)
+                return false;
+        } else if (!link.equals(other.link))
+            return false;
         if (notValidAfter == null) {
             if (other.notValidAfter != null)
                 return false;

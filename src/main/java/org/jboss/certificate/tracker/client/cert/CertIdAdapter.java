@@ -29,7 +29,6 @@ public class CertIdAdapter extends XmlAdapter<String, CertId> {
     @Override
     public CertId unmarshal(String value) throws Exception {
         return value.isEmpty() ? null : new CertId(value);
-
     }
 
     @Override
