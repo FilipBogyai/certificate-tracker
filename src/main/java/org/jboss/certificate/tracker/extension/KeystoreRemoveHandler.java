@@ -21,8 +21,8 @@ public class KeystoreRemoveHandler extends AbstractRemoveStepHandler{
             throws OperationFailedException {
 
         // remove keystore manager from service
-        String path = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        KeystoresTrackingManager.INSTANCE.removeKeystoreManager(path);
+        String name = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        KeystoresTrackingManager.INSTANCE.removeKeystoreManager(name);
     }
 
 }

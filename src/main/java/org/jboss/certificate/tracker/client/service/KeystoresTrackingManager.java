@@ -63,9 +63,9 @@ public class KeystoresTrackingManager {
         return null;
     }
 
-    public void addKeystore(String keystorePath, String keystoreType, String password, String aliases) {
+    public void addKeystore(String name, String keystorePath, String keystoreType, String password, String aliases) {
         
-        KeystoreManager keystoreManager = new KeystoreManager(keystorePath, keystoreType, password, aliases);
+        KeystoreManager keystoreManager = new KeystoreManager(name, keystorePath, keystoreType, password, aliases);
         addKeystoreManager(keystoreManager);
     }
     

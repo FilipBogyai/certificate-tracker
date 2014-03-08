@@ -51,6 +51,7 @@ public class SubsystemExtension implements Extension {
     private final SubsystemParser parser = new SubsystemParser();
 
     protected static final String KEYSTORES = "keystores";
+    protected static final String NAME = "name";
     protected static final String PATH = "path";
     protected static final String KEYSTORE = "keystore";
     protected static final String PASSWORD = "password";
@@ -104,15 +105,19 @@ public class SubsystemExtension implements Extension {
             for (Property property : path.asPropertyList()) {
 
                 writer.writeStartElement(KEYSTORE);
-                writer.writeAttribute(PATH, property.getName());
+                writer.writeAttribute(NAME, property.getName());
+
                 ModelNode entry = property.getValue();
-                KeystoreDefinition.TYPE.marshallAsAttribute(entry, true, writer);
+                KeystoreDefinition.PATH.marshallAsAttribute(entry, true, writer);
 
                 ModelNode entry2 = property.getValue();
-                KeystoreDefinition.PASSWORD.marshallAsAttribute(entry2, true, writer);
+                KeystoreDefinition.TYPE.marshallAsAttribute(entry2, true, writer);
 
                 ModelNode entry3 = property.getValue();
-                KeystoreDefinition.ALIASES.marshallAsAttribute(entry3, true, writer);
+                KeystoreDefinition.PASSWORD.marshallAsAttribute(entry3, true, writer);
+
+                ModelNode entry4 = property.getValue();
+                KeystoreDefinition.ALIASES.marshallAsAttribute(entry4, true, writer);
                 writer.writeEndElement();
             }
             writer.writeEndElement();
@@ -170,12 +175,15 @@ public class SubsystemExtension implements Extension {
             ModelNode addKeystoreOperationModelNode = new ModelNode();
             addKeystoreOperationModelNode.get(OP).set(ADD);
 
-            String path = null;
+            String name = null;
             for (int i = 0; i < reader.getAttributeCount(); i++) {
                 String attribute = reader.getAttributeLocalName(i);
                 String value = reader.getAttributeValue(i);
-                if (attribute.equals(PATH)) {
-                    path = value;
+
+                if (attribute.equals(NAME)) {
+                    name = value;
+                } else if (attribute.equals(PATH)) {
+                    KeystoreDefinition.PATH.parseAndSetParameter(value, addKeystoreOperationModelNode, reader);
                 } else if (attribute.equals(TYPE)) {
                     KeystoreDefinition.TYPE.parseAndSetParameter(value, addKeystoreOperationModelNode, reader);
                 } else if (attribute.equals(PASSWORD)) {
@@ -187,11 +195,11 @@ public class SubsystemExtension implements Extension {
                 }
             }
             ParseUtils.requireNoContent(reader);
-            if (path == null) {
+            if (name == null) {
                 throw ParseUtils.missingRequiredElement(reader, Collections.singleton(PATH));
             }
 
-            PathAddress address = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(KEYSTORE, path));
+            PathAddress address = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(KEYSTORE, name));
             addKeystoreOperationModelNode.get(OP_ADDR).set(address.toModelNode());
             list.add(addKeystoreOperationModelNode);
         }

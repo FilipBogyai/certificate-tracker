@@ -24,6 +24,7 @@ public class KeystoreAddHandler extends AbstractAddStepHandler {
 
     @Override
     protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+        KeystoreDefinition.PATH.validateAndSet(operation, model);
         KeystoreDefinition.PASSWORD.validateAndSet(operation, model);
         KeystoreDefinition.TYPE.validateAndSet(operation, model);
         KeystoreDefinition.ALIASES.validateAndSet(operation, model);
@@ -35,13 +36,14 @@ public class KeystoreAddHandler extends AbstractAddStepHandler {
             final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers)
             throws OperationFailedException {
 
-        String path = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        String name = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        String path = KeystoreDefinition.PATH.resolveModelAttribute(context, model).asString();
         String password = KeystoreDefinition.PASSWORD.resolveModelAttribute(context, model).asString();
         String type = KeystoreDefinition.TYPE.resolveModelAttribute(context, model).asString();
         String aliases = KeystoreDefinition.ALIASES.resolveModelAttribute(context, model).asString();
         // add keystore manager to service
-        log.info("Adding new keystore to certificate-tracker: " + path);
-        KeystoresTrackingManager.INSTANCE.addKeystore(path, type, password, aliases);
+        log.info("Adding new keystore to certificate-tracker: " + name + " : " + path);
+        KeystoresTrackingManager.INSTANCE.addKeystore(name, path, type, password, aliases);
 
     }
 }

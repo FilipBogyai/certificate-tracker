@@ -25,7 +25,7 @@ public class KeystoreManager {
 
     private final Logger log = Logger.getLogger(KeystoreManager.class);
 
-    private final String name = "";
+    private final String name;
     private final String keystorePath;
     private final String keystoreType;
     private final String password;
@@ -33,18 +33,19 @@ public class KeystoreManager {
     private final String[] managedAliases;
     private boolean isUpdated;
 
-    public KeystoreManager(String keystorePath, String keystoreType, String password) {
+    public KeystoreManager(String name, String keystorePath, String keystoreType, String password) {
 
-        this(keystorePath, keystoreType, password, "");
+        this(name, keystorePath, keystoreType, password, "");
     }
 
-    public KeystoreManager(String keystorePath, String keystoreType, String password, String aliases) {
+    public KeystoreManager(String name, String keystorePath, String keystoreType, String password, String aliases) {
 
-        this(keystorePath, keystoreType, password, aliases.split(","));
+        this(name, keystorePath, keystoreType, password, aliases.split(","));
     }
 
-    public KeystoreManager(String keystorePath, String keystoreType, String password, String[] managedAliases) {
+    public KeystoreManager(String name, String keystorePath, String keystoreType, String password, String[] managedAliases) {
 
+        this.name = name;
         this.keystorePath = keystorePath;
         this.keystoreType = keystoreType;
         this.password = password;

@@ -26,17 +26,28 @@ import org.junit.Test;
 /**
  * Tests all management expects for subsystem, parsing, marshaling, model
  * definition and other Here is an example that allows you a fine grained
- * controler over what is tested and how. So it can give you ideas what can be
+ * controller over what is tested and how. So it can give you ideas what can be
  * done and tested. If you have no need for advanced testing of subsystem you
- * look at {@link SubsystemBaseParsingTestCase} that testes same stuff but most
+ * look at {@link SubsystemBaseParsingTestCase} that tests same stuff but most
  * of the code is hidden inside of test harness
  * 
- * @author <a href="kabir.khan@jboss.com">Kabir Khan</a>
+ * @author Filip Bogyai
  */
 public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
     public SubsystemParsingTestCase() {
         super(SubsystemExtension.SUBSYSTEM_NAME, new SubsystemExtension());
+    }
+    
+    public String getSubsystemXML(){
+        
+        return "<subsystem xmlns=\"" + SubsystemExtension.NAMESPACE + "\">" +
+                  "<keystores>" +
+                      "<keystore name=\"example\" path=\"" + getResourcesPath("example.keystore") + "\" type=\"JKS\" password=\"secret\" />" +
+                      "<keystore name=\"test\" path=\"" + getResourcesPath("test.keystore") + "\" type=\"JKS\" password=\"secret\" />" +
+                  "</keystores>" +
+                  "<pki-client url=\"http://example.com\" time-interval=\"3000\" />" + 
+                "</subsystem>";
     }
 
     /**
@@ -45,10 +56,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     @Test
     public void testParseSubsystem() throws Exception {
         // Parse the subsystem xml into operations
-        String subsystemXml = "<subsystem xmlns=\"" + SubsystemExtension.NAMESPACE + "\">" + "<keystores>" + "<keystore path=\""
-                + getResourcesPath("example.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "<keystore path=\""
-                + getResourcesPath("test.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "</keystores>"
-                + "<pki-client url=\"http://example.com\" time-interval=\"3000\" />" + "</subsystem>";
+        String subsystemXml = getSubsystemXML();
         List<ModelNode> operations = super.parse(subsystemXml);
 
         // /Check that we have the expected number of operations
@@ -66,6 +74,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         // Then we will get the add keystore operation
         ModelNode addKeystore = operations.get(1);
         Assert.assertEquals(ADD, addKeystore.get(OP).asString());
+        Assert.assertEquals(getResourcesPath("example.keystore"), addKeystore.get("path").asString());
         Assert.assertEquals("secret", addKeystore.get("password").asString());
         addr = PathAddress.pathAddress(addKeystore.get(OP_ADDR));
         Assert.assertEquals(2, addr.size());
@@ -74,7 +83,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         Assert.assertEquals(SubsystemExtension.SUBSYSTEM_NAME, element.getValue());
         element = addr.getElement(1);
         Assert.assertEquals("keystore", element.getKey());
-        Assert.assertEquals(getResourcesPath("example.keystore"), element.getValue());
+        Assert.assertEquals("example", element.getValue());
 
         // Then we will get the add operation for pki-client
         ModelNode addPKIClient = operations.get(3);
@@ -97,10 +106,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     @Test
     public void testInstallIntoController() throws Exception {
         // Parse the subsystem xml and install into the controller
-        String subsystemXml = "<subsystem xmlns=\"" + SubsystemExtension.NAMESPACE + "\">" + "<keystores>" + "<keystore path=\""
-                + getResourcesPath("example.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "<keystore path=\""
-                + getResourcesPath("test.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "</keystores>"
-                + "<pki-client url=\"http://example.com\" time-interval=\"3000\" />" + "</subsystem>";
+        String subsystemXml = getSubsystemXML();
         KernelServices services = super.installInController(subsystemXml);
 
         // Read the whole model and make sure it looks as expected
@@ -108,20 +114,21 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
         Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(SubsystemExtension.SUBSYSTEM_NAME));
         Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME).hasDefined("keystore"));
-        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore").hasDefined(
-                getResourcesPath("example.keystore")));
-        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", getResourcesPath("example.keystore"))
-                .hasDefined("type"));
-        Assert.assertEquals("JKS",
-                model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", getResourcesPath("example.keystore"), "type")
-                        .asString());
-
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore").hasDefined("example"));
+        
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", "example").hasDefined("path"));
+        Assert.assertEquals(getResourcesPath("example.keystore"), model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", "example", "path").asString());
+        
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", "example").hasDefined("password"));
+        Assert.assertEquals("secret", model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", "example", "password").asString());
+        
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", "example").hasDefined("type"));
+        Assert.assertEquals("JKS", model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", "example", "type").asString());
+        
         Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME).hasDefined("pki-client"));
         Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "pki-client").hasDefined("http://example.com"));
-        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "pki-client", "http://example.com").hasDefined(
-                "time-interval"));
-        Assert.assertEquals("3000",
-                model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "pki-client", "http://example.com", "time-interval").asString());
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "pki-client", "http://example.com").hasDefined("time-interval"));
+        Assert.assertEquals("3000", model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "pki-client", "http://example.com", "time-interval").asString());
     }
 
     /**
@@ -132,10 +139,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     @Test
     public void testParseAndMarshalModel() throws Exception {
         // Parse the subsystem xml and install into the first controller
-        String subsystemXml = "<subsystem xmlns=\"" + SubsystemExtension.NAMESPACE + "\">" + "<keystores>" + "<keystore path=\""
-                + getResourcesPath("example.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "<keystore path=\""
-                + getResourcesPath("test.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "</keystores>"
-                + "<pki-client url=\"http://example.com\" time-interval=\"3000\" />" + "</subsystem>";
+        String subsystemXml = getSubsystemXML();
         KernelServices servicesA = super.installInController(subsystemXml);
         // Get the model and the persisted xml from the first controller
         ModelNode modelA = servicesA.readWholeModel();
@@ -183,10 +187,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     @Test
     public void testSubsystemRemoval() throws Exception {
         // Parse the subsystem xml and install into the first controller
-        String subsystemXml = "<subsystem xmlns=\"" + SubsystemExtension.NAMESPACE + "\">" + "<keystores>" + "<keystore path=\""
-                + getResourcesPath("example.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "<keystore path=\""
-                + getResourcesPath("test.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "</keystores>"
-                + "<pki-client url=\"http://example.com\" time-interval=\"3000\" />" + "</subsystem>";
+        String subsystemXml = getSubsystemXML();
         KernelServices services = super.installInController(subsystemXml);
 
         services.getContainer().getRequiredService(CertificateTrackingService.getServiceName());
@@ -206,17 +207,18 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     @Test
     public void testExecuteOperations() throws Exception {
 
-        String subsystemXml = "<subsystem xmlns=\"" + SubsystemExtension.NAMESPACE + "\">" + "<keystores>" + "<keystore path=\""
+        String subsystemXml = "<subsystem xmlns=\"" + SubsystemExtension.NAMESPACE + "\">" + "<keystores>" + "<keystore name=\"example\" path=\""
                 + getResourcesPath("example.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "</keystores>"
                 + "<pki-client url=\"http://example.com\" />" + "</subsystem>";
 
         KernelServices services = super.installInController(subsystemXml);
 
         PathAddress keystore2Address = PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME),
-                PathElement.pathElement("keystore", getResourcesPath("test.keystore")));
+                PathElement.pathElement("keystore", "test"));
         ModelNode addOp = new ModelNode();
         addOp.get(OP).set(ADD);
         addOp.get(OP_ADDR).set(keystore2Address.toModelNode());
+        addOp.get("path").set(getResourcesPath("test.keystore"));
         addOp.get("password").set("secret");
 
         ModelNode result = services.executeOperation(addOp);
@@ -226,12 +228,10 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
         Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(SubsystemExtension.SUBSYSTEM_NAME));
         Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME).hasDefined("keystore"));
-        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore").hasDefined(getResourcesPath("test.keystore")));
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore").hasDefined("test"));
         // check default type="JKS"
-        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", getResourcesPath("test.keystore"))
-                .hasDefined("type"));
-        Assert.assertEquals("JKS",
-                model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", getResourcesPath("test.keystore"), "type").asString());
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", "test").hasDefined("type"));
+        Assert.assertEquals("JKS", model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "keystore", "test", "type").asString());
 
         Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME).hasDefined("pki-client"));
         Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, "pki-client").hasDefined("http://example.com"));
@@ -269,14 +269,12 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
     @Test
     public void testChangeKeystorePassword() throws Exception {
-        String subsystemXml = "<subsystem xmlns=\"" + SubsystemExtension.NAMESPACE + "\">" + "<keystores>" + "<keystore path=\""
-                + getResourcesPath("example.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "</keystores>"
-                + "<pki-client url=\"http://example.com\" />" + "</subsystem>";
+        String subsystemXml = getSubsystemXML();
 
         KernelServices services = super.installInController(subsystemXml);
 
         PathAddress exampleAddress = PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME),
-                PathElement.pathElement("keystore", getResourcesPath("example.keystore")));
+                PathElement.pathElement("keystore", "example"));
 
         ModelNode writeOp = new ModelNode();
         writeOp.get(OP).set(WRITE_ATTRIBUTE_OPERATION);

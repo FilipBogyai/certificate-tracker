@@ -20,7 +20,8 @@
       </xs:choice>
    </xs:complexType>
    
-   <xs:complexType name="keystoreType">   	  
+   <xs:complexType name="keystoreType">  
+   	  <xs:attribute name="name" use="required"/> 	  
       <xs:attribute name="path" use="required"/>
       <xs:attribute name="password" use="required"/>
       <xs:attribute name="type" use="optional"/>
@@ -29,6 +30,7 @@
    
    <xs:complexType name="pkiClientType">
       <xs:attribute name="url" type="xs:string" use="required"/>
-      <xs:attribute name="time-interval" type="xs:positiveInteger" use="required"/>      
+      <xs:attribute name="time-interval" type="xs:positiveInteger" use="required"/>  
+      <xs:attribute name="truststore-name" type="xs:string" use="optional"/>     
    </xs:complexType>
 </xs:schema>

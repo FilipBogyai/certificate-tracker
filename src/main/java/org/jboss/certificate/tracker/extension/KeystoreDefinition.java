@@ -12,6 +12,14 @@ public class KeystoreDefinition extends SimpleResourceDefinition {
 
     public static final KeystoreDefinition INSTANCE = new KeystoreDefinition();
 
+    protected static final SimpleAttributeDefinition PATH = 
+            new SimpleAttributeDefinitionBuilder(SubsystemExtension.PATH,
+            ModelType.STRING).
+            setAllowExpression(true).
+            setXmlName(SubsystemExtension.PATH).
+            setAllowNull(false).
+            build();
+    
     protected static final SimpleAttributeDefinition PASSWORD = 
             new SimpleAttributeDefinitionBuilder(SubsystemExtension.PASSWORD,
             ModelType.STRING).
@@ -45,6 +53,7 @@ public class KeystoreDefinition extends SimpleResourceDefinition {
         // write handlers
 
         // KeystoreTypeHandler.INSTANCE KeystorePasswordHandler.INSTANCE
+        resourceRegistration.registerReadWriteAttribute(PATH, null, new ReloadRequiredWriteAttributeHandler(PATH));
         resourceRegistration.registerReadWriteAttribute(TYPE, null, new ReloadRequiredWriteAttributeHandler(TYPE));
         resourceRegistration.registerReadWriteAttribute(PASSWORD, null, new ReloadRequiredWriteAttributeHandler(PASSWORD));
         resourceRegistration.registerReadWriteAttribute(ALIASES, null, new ReloadRequiredWriteAttributeHandler(ALIASES));
