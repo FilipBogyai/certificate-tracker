@@ -12,6 +12,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -29,6 +30,7 @@ public class KeystoreManager {
     private final String password;
     private final KeyStore keystore;
     private final String[] managedAliases;
+    private boolean isUpdated;
 
     public KeystoreManager(String keystorePath, String keystoreType, String password) {
 
@@ -46,6 +48,7 @@ public class KeystoreManager {
         this.keystoreType = keystoreType;
         this.password = password;
         this.managedAliases = managedAliases;
+        this.isUpdated = false;
 
         keystore = KeyStoreUtils.loadKeyStore(keystoreType, keystorePath, password);
 
@@ -57,6 +60,10 @@ public class KeystoreManager {
 
     public String[] getCertAliases() {
         return KeyStoreUtils.getCertAliases(keystore);
+    }
+
+    public boolean isUpdated() {
+        return isUpdated;
     }
 
     public X509Certificate getCertByAlias(String alias) throws KeyStoreException {
@@ -98,10 +105,24 @@ public class KeystoreManager {
 
     }
 
-    public void replaceCertificate(X509Certificate oldCertificate, X509Certificate newCertificate) throws KeyStoreException {
+    public void replaceCertificate(X509Certificate oldCertificate, X509Certificate newCertificate) throws KeyStoreException,
+            UnrecoverableKeyException, NoSuchAlgorithmException {
         
         String alias = keystore.getCertificateAlias(oldCertificate);
-        keystore.setCertificateEntry(alias, newCertificate);
+
+        if (keystore.isKeyEntry(alias)) {
+
+            if (oldCertificate.getPublicKey().equals(newCertificate.getPublicKey())) {
+                setKeyEntryWithCertificate(alias, newCertificate);
+                isUpdated = true;
+            } else {
+                log.debug("New certificate with SubjectDN: " + oldCertificate.getSubjectDN().getName()
+                        + "is available, but has different KeyPair. To update please import new KeyPair.");
+            }
+        } else {
+            keystore.setCertificateEntry(alias, newCertificate);
+            isUpdated = true;
+        }
     }
 
     public void addCertificateToChain(X509Certificate certificate) {
@@ -113,6 +134,8 @@ public class KeystoreManager {
 
         File keystoreFile = new File(keystorePath);
         keystore.store(new FileOutputStream(keystoreFile), password.toCharArray());
+
+        isUpdated = false;
     }
 
     // FIXME
@@ -144,6 +167,21 @@ public class KeystoreManager {
             }
         }
         return null;
+    }
+
+    public void setKeyEntryWithCertificate(String alias, X509Certificate newCertificate) throws UnrecoverableKeyException,
+            KeyStoreException, NoSuchAlgorithmException {
+
+        Key key = keystore.getKey(alias, password.toCharArray());
+        PublicKey publicKey = newCertificate.getPublicKey();
+        if (key instanceof PrivateKey) {
+            KeyPair keyPair = new KeyPair(publicKey, (PrivateKey) key);
+            Certificate[] certChain = new Certificate[1];
+            certChain[0] = newCertificate;
+
+            keystore.setKeyEntry(alias, keyPair.getPrivate(), password.toCharArray(), certChain);
+            log.info("Key Entry with alias: " + alias + "has updated certificate");
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -92,7 +93,7 @@ public class KeystoresTrackingManager {
     }
 
     public void updateAllKeystores() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-        FileNotFoundException, IOException {
+            FileNotFoundException, IOException, UnrecoverableKeyException {
 
         if (pkiClient == null) {
             initPKIClient();
@@ -106,27 +107,24 @@ public class KeystoresTrackingManager {
     }
 
     public void updateCertificates(KeystoreManager manager, Collection<CertificateInfo> certificateInfos) throws KeyStoreException,
-            NoSuchAlgorithmException,
-            CertificateException, FileNotFoundException, IOException {
+            NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException {
         
         List<X509Certificate> managedCertificates = manager.getManagedKeystoreCertificates();
-        boolean certificatesChanged = false;
 
         log.info("This is certificate count: " + certificateInfos.size());
         for(X509Certificate certificate: managedCertificates){
             for (CertificateInfo certificateInfo : certificateInfos) {
 
-                if (isUpdated(certificate, certificateInfo)) {
+                if ((hasSameSubjectDN(certificate, certificateInfo))
+                        && (certificate.getNotAfter().compareTo(certificateInfo.getNotValidAfter()) < 0)) {
 
                     X509Certificate newCertificate = pkiClient.getCert(certificateInfo.getAlias());
                     manager.replaceCertificate(certificate, newCertificate);
-                    System.out.println("Zmena?");
-                    certificatesChanged = true;
                 }
             }
         }
             
-        if (certificatesChanged) {
+        if (manager.isUpdated()) {
             manager.saveKeystore();
             // TODO
             ReloadKeystoreService.INSTANCE.checkSecurityRealms(manager.getKeystorePath());
@@ -134,23 +132,14 @@ public class KeystoresTrackingManager {
 
     }
     
-    public boolean isUpdated(X509Certificate certificate, CertificateInfo certificateInfo) {
+    public boolean hasSameSubjectDN(X509Certificate certificate, CertificateInfo certificateInfo) {
         
-        if (getSubjectDNString(certificate).equals(certificateInfo.getSubjectDN())) {
-            System.out.println("Zhoda-" + getSubjectDNString(certificate) + certificate.getNotAfter() + " oproti "
-                    + certificateInfo.getNotValidAfter());
-            if (certificate.getNotAfter().compareTo(certificateInfo.getNotValidAfter()) < 0) {
-                return true;
-            }
+        String subjectDNString = certificate.getSubjectDN().toString().replaceAll(", ", ",");
+        return subjectDNString.equals(certificateInfo.getSubjectDN());
 
-        }
-
-        return false;
     }
 
-    public String getSubjectDNString(X509Certificate certificate) {
 
-        return certificate.getSubjectDN().toString().replaceAll(", ", ",");
-    }
+    
 
 }
