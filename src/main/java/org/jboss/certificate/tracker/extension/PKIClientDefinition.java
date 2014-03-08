@@ -21,6 +21,13 @@ public class PKIClientDefinition extends SimpleResourceDefinition {
             .setAllowNull(true)
             .build();
     
+    protected static final SimpleAttributeDefinition TRUSTSTORE_NAME =
+            new SimpleAttributeDefinitionBuilder(SubsystemExtension.TRUSTSTORE_NAME, ModelType.STRING)
+            .setAllowExpression(true)
+            .setXmlName(SubsystemExtension.TRUSTSTORE_NAME)            
+            .setAllowNull(true)
+            .build();
+    
     private PKIClientDefinition() {
         super(SubsystemExtension.PKI_CLIENT_PATH, SubsystemExtension.getResourceDescriptionResolver(SubsystemExtension.PKI_CLIENT),
                 PKIClientAddHandler.INSTANCE, PKIClientRemoveHandler.INSTANCE);
@@ -30,6 +37,7 @@ public class PKIClientDefinition extends SimpleResourceDefinition {
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
         // write attribute for time_interval
         resourceRegistration.registerReadWriteAttribute(TIME_INTERVAL, null, PKIClientTimeIntervalHandler.INSTANCE);
+        resourceRegistration.registerReadWriteAttribute(TRUSTSTORE_NAME, null, PKIClientTimeIntervalHandler.INSTANCE);
     }
 
 }

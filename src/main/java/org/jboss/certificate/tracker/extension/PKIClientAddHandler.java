@@ -39,6 +39,7 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
 
         String url = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
         long timeInterval = PKIClientDefinition.TIME_INTERVAL.resolveModelAttribute(context, model).asLong();
+        String truststoreName = PKIClientDefinition.TRUSTSTORE_NAME.resolveModelAttribute(context, model).asString();
 
         final ManagementService serverControllerService = new ManagementService();
         ServiceController<ManagementService> serverServiceController = context.getServiceTarget()
@@ -48,7 +49,7 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
                 .install();
         newControllers.add(serverServiceController);
 
-        CertificateTrackingService certificateTrackingService = new CertificateTrackingService(url, timeInterval);
+        CertificateTrackingService certificateTrackingService = new CertificateTrackingService(url, truststoreName, timeInterval);
         ServiceName serviceName = CertificateTrackingService.getServiceName();
         ServiceController<CertificateTrackingService> serviceController = context.getServiceTarget()
                 .addService(serviceName, certificateTrackingService)

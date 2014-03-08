@@ -43,11 +43,11 @@ public class KeystoresTrackingManager {
     private void initPKIClient() {
 
         try {
-            if (trustStoreManagerName != null) {
+            if (trustStoreManagerName == null || trustStoreManagerName.equals("undefined")) {
+                pkiClient = new DogtagPKIClient(urlTarget);
+            } else {
                 KeyStore trustStore = getKeystoreManager(trustStoreManagerName).getKeystore();
                 pkiClient = new DogtagPKIClient(urlTarget, trustStore);
-            } else {
-                pkiClient = new DogtagPKIClient(urlTarget);
             }
         } catch (URISyntaxException ex) {
             log.error("URL of CA is wrong: " + ex);

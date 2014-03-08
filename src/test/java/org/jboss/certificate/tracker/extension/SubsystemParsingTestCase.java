@@ -46,7 +46,7 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
                       "<keystore name=\"example\" path=\"" + getResourcesPath("example.keystore") + "\" type=\"JKS\" password=\"secret\" />" +
                       "<keystore name=\"test\" path=\"" + getResourcesPath("test.keystore") + "\" type=\"JKS\" password=\"secret\" />" +
                   "</keystores>" +
-                  "<pki-client url=\"http://example.com\" time-interval=\"3000\" />" + 
+                  "<pki-client url=\"http://example.com\" time-interval=\"3000\" truststore-name=\"example\" />" + 
                 "</subsystem>";
     }
 
