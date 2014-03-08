@@ -25,6 +25,7 @@ public class KeystoreManager {
 
     private final Logger log = Logger.getLogger(KeystoreManager.class);
 
+    private final String name = "";
     private final String keystorePath;
     private final String keystoreType;
     private final String password;
@@ -54,8 +55,17 @@ public class KeystoreManager {
 
     }
 
+    public String getName() {
+        return name;
+    }
+
     public String getKeystorePath() {
         return keystorePath;
+    }
+
+    public KeyStore getKeystore() {
+
+        return keystore;
     }
 
     public String[] getCertAliases() {
@@ -115,13 +125,15 @@ public class KeystoreManager {
             if (oldCertificate.getPublicKey().equals(newCertificate.getPublicKey())) {
                 setKeyEntryWithCertificate(alias, newCertificate);
                 isUpdated = true;
+                log.info("Certificate for KeyPair: " + alias + " has been updated in Keystore named: " + name);
             } else {
                 log.debug("New certificate with SubjectDN: " + oldCertificate.getSubjectDN().getName()
-                        + "is available, but has different KeyPair. To update please import new KeyPair.");
+                        + " is available, but has different KeyPair. To update please import new KeyPair.");
             }
         } else {
             keystore.setCertificateEntry(alias, newCertificate);
             isUpdated = true;
+            log.info("Certificate with alias: " + alias + " has been updated in Keystore named: " + name);
         }
     }
 
@@ -180,7 +192,6 @@ public class KeystoreManager {
             certChain[0] = newCertificate;
 
             keystore.setKeyEntry(alias, keyPair.getPrivate(), password.toCharArray(), certChain);
-            log.info("Key Entry with alias: " + alias + "has updated certificate");
         }
     }
 

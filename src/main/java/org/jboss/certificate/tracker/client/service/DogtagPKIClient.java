@@ -1,6 +1,7 @@
 package org.jboss.certificate.tracker.client.service;
 
 import java.net.URISyntaxException;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,12 +17,18 @@ public class DogtagPKIClient implements PKIClient {
 
     public DogtagPKIClient(String urlTarget) throws URISyntaxException {
 
-        this(new CertClient(urlTarget));
+        certClient = new CertClient(urlTarget);
     }
 
-    public DogtagPKIClient(CertClient certClient) {
+    public DogtagPKIClient(String urlTarget, String trustStorePath, String password, String keystoreType) throws URISyntaxException {
 
-        this.certClient = certClient;
+        KeyStore trustStore = KeyStoreUtils.loadKeyStore(keystoreType, trustStorePath, password);
+        certClient = new CertClient(urlTarget, trustStore);
+    }
+
+    public DogtagPKIClient(String urlTarget, KeyStore trustStore) throws URISyntaxException {
+
+        certClient = new CertClient(urlTarget, trustStore);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.jboss.certificate.tracker.client.cert;
 
 import java.net.URISyntaxException;
+import java.security.KeyStore;
 
 import javax.ws.rs.core.Response;
 
@@ -12,17 +13,32 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 public class CertClient {
 
     private final String urlTarget;
+    private final KeyStore truststore;
     public CertResource certClient;
 
     public CertClient(String urlTarget) throws URISyntaxException {
 
         this.urlTarget = urlTarget;
+        this.truststore = null;
+        init();
+    }
+    
+    public CertClient(String urlTarget, KeyStore truststore) throws URISyntaxException {
+
+        this.urlTarget = urlTarget;
+        this.truststore = truststore;
         init();
     }
 
     public void init() throws URISyntaxException {
 
-        ResteasyClient resteasyClient = new ResteasyClientBuilder().build();
+        ResteasyClient resteasyClient = null;
+        if (truststore != null) {
+            resteasyClient = new ResteasyClientBuilder().trustStore(truststore).build();
+        } else {
+            resteasyClient = new ResteasyClientBuilder().build();
+        }
+
         ResteasyWebTarget target = resteasyClient.target(urlTarget);
         certClient = target.proxy(CertResource.class);
     }

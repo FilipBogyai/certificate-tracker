@@ -16,12 +16,20 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
     private final Logger log = Logger.getLogger(CertificateTrackingService.class);
 
     private String url;
+    private String trustStoreName;
     private long timeInterval = 600000;
     private Timer timer = null;
 
     public CertificateTrackingService(String url, long timeInterval) {
         
         this.url = url;
+        this.timeInterval = timeInterval;
+    }
+
+    public CertificateTrackingService(String url, String trustStoreName, long timeInterval) {
+
+        this.url = url;
+        this.trustStoreName = trustStoreName;
         this.timeInterval = timeInterval;
     }
 
@@ -42,6 +50,7 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
                 public void run() {
                     log.info("Checking certificates entires ");
                     KeystoresTrackingManager.INSTANCE.setUrlTarget(url);
+                    KeystoresTrackingManager.INSTANCE.setTrustStoreManagerName(trustStoreName);
                     try {
                         KeystoresTrackingManager.INSTANCE.updateAllKeystores();
                     } catch (Exception e) {

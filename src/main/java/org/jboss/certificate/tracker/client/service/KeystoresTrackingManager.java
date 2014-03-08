@@ -3,6 +3,7 @@ package org.jboss.certificate.tracker.client.service;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -19,6 +20,7 @@ public class KeystoresTrackingManager {
     private final List<KeystoreManager> keystoreManagers;
     private PKIClient pkiClient;
     private String urlTarget;
+    private String trustStoreManagerName;
 
     private final Logger log = Logger.getLogger(KeystoresTrackingManager.class);
 
@@ -26,36 +28,39 @@ public class KeystoresTrackingManager {
 
     private KeystoresTrackingManager() {
         pkiClient = null;
-        keystoreManagers = new ArrayList<KeystoreManager>();
-    }
-
-    public KeystoresTrackingManager(PKIClient pkiClient) {
-        
-        this.pkiClient = pkiClient;
+        trustStoreManagerName = null;
         keystoreManagers = new ArrayList<KeystoreManager>();
     }
     
-    public void setNewDogtagClient(String urlTarget) throws URISyntaxException {
-
-        pkiClient = new DogtagPKIClient(urlTarget);
-
-    }
-
     public void setUrlTarget(String urlTarget) {
         this.urlTarget = urlTarget;
     }
 
-    public void setPKIClient(PKIClient pkiClient) {
-        this.pkiClient = pkiClient;
+    public void setTrustStoreManagerName(String trustStoreManagerName) {
+        this.trustStoreManagerName = trustStoreManagerName;
     }
 
     private void initPKIClient() {
 
         try {
-            setNewDogtagClient(urlTarget);
+            if (trustStoreManagerName != null) {
+                KeyStore trustStore = getKeystoreManager(trustStoreManagerName).getKeystore();
+                pkiClient = new DogtagPKIClient(urlTarget, trustStore);
+            } else {
+                pkiClient = new DogtagPKIClient(urlTarget);
+            }
         } catch (URISyntaxException ex) {
             log.error("URL of CA is wrong: " + ex);
         }
+    }
+
+    private KeystoreManager getKeystoreManager(String name) {
+        for (KeystoreManager manager : keystoreManagers) {
+            if (manager.getName().equals(name)) {
+                return manager;
+            }
+        }
+        return null;
     }
 
     public void addKeystore(String keystorePath, String keystoreType, String password, String aliases) {
@@ -69,23 +74,11 @@ public class KeystoresTrackingManager {
         keystoreManagers.add(keystoreManager);
     }
     
-    public KeystoreManager getKeystoreManager(String path) {
+    public void removeKeystoreManager(String name) {
 
         for (KeystoreManager keystoreManager : keystoreManagers) {
 
-            if (keystoreManager.getKeystorePath().equals(path)) {
-                return keystoreManager;
-            }
-        }
-        return null;
-
-    }
-
-    public void removeKeystoreManager(String path) {
-
-        for (KeystoreManager keystoreManager : keystoreManagers) {
-
-            if (keystoreManager.getKeystorePath().equals(path)) {
+            if (keystoreManager.getName().equals(name)) {
                 keystoreManagers.remove(keystoreManager);
                 return;
             }
@@ -111,7 +104,6 @@ public class KeystoresTrackingManager {
         
         List<X509Certificate> managedCertificates = manager.getManagedKeystoreCertificates();
 
-        log.info("This is certificate count: " + certificateInfos.size());
         for(X509Certificate certificate: managedCertificates){
             for (CertificateInfo certificateInfo : certificateInfos) {
 
