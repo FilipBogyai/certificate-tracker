@@ -53,8 +53,8 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
                     KeystoresTrackingManager.INSTANCE.setTrustStoreManagerName(trustStoreName);
                     try {
                         KeystoresTrackingManager.INSTANCE.updateAllKeystores();
-                    } catch (Exception e) {
-                        log.debug(e.getMessage());
+                    } catch (Exception ex) {
+                        log.error(ex);
                     }
                 }
             }, timeInterval, timeInterval);

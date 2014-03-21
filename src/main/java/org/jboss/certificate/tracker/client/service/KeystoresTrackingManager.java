@@ -1,13 +1,9 @@
 package org.jboss.certificate.tracker.client.service;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,8 +81,7 @@ public class KeystoresTrackingManager {
         }
     }
 
-    public void updateAllKeystores() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-            FileNotFoundException, IOException, UnrecoverableKeyException {
+    public void updateAllKeystores() throws IOException {
 
         if (pkiClient == null) {
             initPKIClient();
@@ -99,11 +94,15 @@ public class KeystoresTrackingManager {
         }
     }
 
-    public void updateCertificates(KeystoreManager manager, Collection<CertificateInfo> certificateInfos) throws KeyStoreException,
-            NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException {
-        
-        List<X509Certificate> managedCertificates = manager.getManagedKeystoreCertificates();
+    public void updateCertificates(KeystoreManager manager, Collection<CertificateInfo> certificateInfos) throws IOException {
 
+        List<X509Certificate> managedCertificates = new ArrayList<X509Certificate>();
+        try {
+            manager.getManagedKeystoreCertificates();
+        } catch (KeyStoreException ex) {
+            log.error("Cannot obtain keystore certificates:" + manager.getKeystorePath(), ex);
+        }
+        
         for(X509Certificate certificate: managedCertificates){
             for (CertificateInfo certificateInfo : certificateInfos) {
 
@@ -111,7 +110,11 @@ public class KeystoresTrackingManager {
                         && (certificate.getNotAfter().compareTo(certificateInfo.getNotValidAfter()) < 0)) {
 
                     X509Certificate newCertificate = pkiClient.getCert(certificateInfo.getAlias());
-                    manager.replaceCertificate(certificate, newCertificate);
+                    try {
+                        manager.replaceCertificate(certificate, newCertificate);
+                    } catch (Exception ex) {
+                        log.error("Unable to update certificate: " + certificate.getSubjectDN().getName(), ex);
+                    }
                 }
             }
         }

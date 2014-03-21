@@ -1,7 +1,6 @@
 package org.jboss.certificate.tracker.client.service;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -14,7 +13,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -142,13 +140,16 @@ public class KeystoreManager {
 
     }
 
-    public void saveKeystore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException,
-            IOException {
+    public void saveKeystore() {
 
         File keystoreFile = new File(keystorePath);
-        keystore.store(new FileOutputStream(keystoreFile), password.toCharArray());
+        try {
+            keystore.store(new FileOutputStream(keystoreFile), password.toCharArray());
+            isUpdated = false;
+        } catch (Exception ex) {
+            log.error("Unable to save keystore: " + keystorePath, ex);
+        }
 
-        isUpdated = false;
     }
 
     // FIXME
