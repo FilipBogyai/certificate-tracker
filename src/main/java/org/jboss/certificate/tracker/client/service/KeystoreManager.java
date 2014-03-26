@@ -2,13 +2,12 @@ package org.jboss.certificate.tracker.client.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
@@ -118,7 +117,7 @@ public class KeystoreManager {
             UnrecoverableKeyException, NoSuchAlgorithmException {
         
         String alias = keystore.getCertificateAlias(oldCertificate);
-
+        
         if (keystore.isKeyEntry(alias)) {
 
             if (oldCertificate.getPublicKey().equals(newCertificate.getPublicKey())) {
@@ -136,10 +135,6 @@ public class KeystoreManager {
         }
     }
 
-    public void addCertificateToChain(X509Certificate certificate) {
-
-    }
-
     public void saveKeystore() {
 
         File keystoreFile = new File(keystorePath);
@@ -152,37 +147,6 @@ public class KeystoreManager {
 
     }
 
-    // FIXME
-    public X509Certificate generateCertificate() throws GeneralSecurityException, IOException {
-
-        for (String alias : getCertAliases()) {
-
-            if (keystore.isKeyEntry(alias)) {
-                Key key = keystore.getKey(alias, password.toCharArray());
-                if (key instanceof PrivateKey) {
-                    // Get certificate of public key
-                    Certificate cert = keystore.getCertificate(alias);
-                    String algorithm = ((X509Certificate) cert).getSigAlgName();
-                    String dn = ((X509Certificate) cert).getSubjectDN().toString();
-                    // Get public key
-                    PublicKey publicKey = cert.getPublicKey();
-
-                    // Return a key pair
-                    KeyPair keyPair = new KeyPair(publicKey, (PrivateKey) key);
-                    X509Certificate certificate = null;
-                    // CertificateUtils.generateCertificate(dn, keyPair, 100,
-                    // algorithm);
-                    Certificate[] cer = new Certificate[] { certificate };
-                    keystore.setKeyEntry(alias, key, password.toCharArray(), cer);
-                    keystore.setKeyEntry("blabla", key, password.toCharArray(), cer);
-                    System.out.println(getCertByAlias(alias));
-                    return certificate;
-                }
-            }
-        }
-        return null;
-    }
-
     public void setKeyEntryWithCertificate(String alias, X509Certificate newCertificate) throws UnrecoverableKeyException,
             KeyStoreException, NoSuchAlgorithmException {
 
@@ -190,8 +154,32 @@ public class KeystoreManager {
         PublicKey publicKey = newCertificate.getPublicKey();
         if (key instanceof PrivateKey) {
             KeyPair keyPair = new KeyPair(publicKey, (PrivateKey) key);
-            Certificate[] certChain = new Certificate[1];
-            certChain[0] = newCertificate;
+            
+            Certificate[] certChain = keystore.getCertificateChain(alias);
+            int i = 0;
+            certChain[i] = newCertificate;
+
+            Principal signer = newCertificate.getIssuerDN();
+            Principal requester = newCertificate.getSubjectDN();
+            List<X509Certificate> certificates = getAllKeystoreCertificates();
+            while (!signer.equals(requester)) {
+                i++;
+                requester = signer;
+                boolean isCACertAvailable = false;
+
+                for (X509Certificate certificate : certificates) {
+                    if (requester.equals(certificate.getSubjectDN())) {
+                        certChain[i] = certificate;
+                        signer = certificate.getIssuerDN();
+                        isCACertAvailable = true;
+                        break;
+                    }
+                }
+
+                if (!isCACertAvailable) {
+                    log.error("Cannot establish trusted path to root CA");
+                }
+            }
 
             keystore.setKeyEntry(alias, keyPair.getPrivate(), password.toCharArray(), certChain);
         }

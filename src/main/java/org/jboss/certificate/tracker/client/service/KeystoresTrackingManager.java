@@ -98,7 +98,7 @@ public class KeystoresTrackingManager {
 
         List<X509Certificate> managedCertificates = new ArrayList<X509Certificate>();
         try {
-            manager.getManagedKeystoreCertificates();
+            managedCertificates = manager.getManagedKeystoreCertificates();
         } catch (KeyStoreException ex) {
             log.error("Cannot obtain keystore certificates:" + manager.getKeystorePath(), ex);
         }
