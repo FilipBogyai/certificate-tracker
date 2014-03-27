@@ -107,8 +107,7 @@ public class KeystoresTrackingManager {
         for(X509Certificate certificate: managedCertificates){
             for (CertificateInfo certificateInfo : certificateInfos) {
 
-                if ((hasSameSubjectDN(certificate, certificateInfo))
-                        && (certificate.getNotAfter().compareTo(certificateInfo.getNotValidAfter()) < 0)) {
+                if (hasSameSubjectDN(certificate, certificateInfo) && isUpdated(certificate, certificateInfo)) {
 
                     X509Certificate newCertificate = pkiClient.getCert(certificateInfo.getAlias());
                     try {
@@ -135,7 +134,19 @@ public class KeystoresTrackingManager {
 
     }
 
+    public boolean isUpdated(X509Certificate certificate, CertificateInfo certificateInfo) {
 
+        boolean hasLongerValidity = certificate.getNotAfter().compareTo(certificateInfo.getNotValidAfter()) < 0;
+
+        boolean isValid = (certificateInfo.getNotValidBefore().getTime() < System.currentTimeMillis())
+                && (certificateInfo.getNotValidAfter().getTime() > System.currentTimeMillis());
+
+        if (!(certificateInfo.getStatus() == null || certificateInfo.getStatus().isEmpty())) {
+            isValid = isValid && certificateInfo.getStatus().equals("VALID");
+        }
+
+        return hasLongerValidity && isValid;
+    }
     
 
 }

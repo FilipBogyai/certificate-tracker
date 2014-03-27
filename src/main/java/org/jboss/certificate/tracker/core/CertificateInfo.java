@@ -2,9 +2,16 @@ package org.jboss.certificate.tracker.core;
 
 import java.util.Date;
 
+/**
+ * This class represents certificate information that are obtained by @PKIClient method listCerts 
+ * from certificate authority. These information are used for certificate synchronization.  
+ * 
+ * @author Filip Bogyai
+ */
+
 public class CertificateInfo {
 
-    private String alias;
+    private String id;
     private String subjectDN;
     private String status;
     private String type;
@@ -14,11 +21,10 @@ public class CertificateInfo {
     private Date issuedOn;
     private String issuedBy;
 
-    public CertificateInfo(String alias, String subjectDN, String status, String type, Integer version, Date notValidBefore,
-            Date notValidAfter,
-            Date issuedOn, String issuedBy) {
+    public CertificateInfo(String id, String subjectDN, String status, String type, Integer version, Date notValidBefore,
+            Date notValidAfter, Date issuedOn, String issuedBy) {
 
-        this.alias = alias;
+        this.id = id;
         this.subjectDN = subjectDN;
         this.status = status;
         this.type = type;
@@ -30,11 +36,11 @@ public class CertificateInfo {
     }
 
     public String getAlias() {
-        return alias;
+        return id;
     }
 
     public void setAlias(String alias) {
-        this.alias = alias;
+        this.id = alias;
     }
 
     public String getSubjectDN() {
@@ -103,7 +109,7 @@ public class CertificateInfo {
 
     @Override
     public String toString() {
-        return "CertificateInfo [alias=" + alias + ", subjectDN=" + subjectDN + ", type=" + type + ", version=" + version
+        return "CertificateInfo [id=" + id + ", subjectDN=" + subjectDN + ", type=" + type + ", version=" + version
                 + ", notValidBefore=" + notValidBefore + ", notValidAfter=" + notValidAfter + ", issuedOn=" + issuedOn + ", issuedBy="
                 + issuedBy + "]";
     }
