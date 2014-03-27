@@ -15,7 +15,7 @@
 // (C) 2007 Red Hat, Inc.
 // All rights reserved.
 // --- END COPYRIGHT BLOCK ---
-package org.jboss.certificate.tracker.client.cert;
+package org.jboss.certificate.tracker.client.dogtag;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 

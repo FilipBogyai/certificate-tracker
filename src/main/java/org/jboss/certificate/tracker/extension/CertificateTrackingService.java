@@ -3,7 +3,7 @@ package org.jboss.certificate.tracker.extension;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.jboss.certificate.tracker.client.service.KeystoresTrackingManager;
+import org.jboss.certificate.tracker.core.KeystoresTrackingManager;
 import org.jboss.logging.Logger;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceName;

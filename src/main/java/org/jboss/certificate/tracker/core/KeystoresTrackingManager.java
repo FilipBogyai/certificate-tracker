@@ -1,4 +1,4 @@
-package org.jboss.certificate.tracker.client.service;
+package org.jboss.certificate.tracker.core;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jboss.certificate.tracker.client.DogtagPKIClient;
 import org.jboss.logging.Logger;
 
 public class KeystoresTrackingManager {
@@ -122,7 +123,7 @@ public class KeystoresTrackingManager {
         if (manager.isUpdated()) {
             manager.saveKeystore();
             // TODO
-            ReloadKeystoreService.INSTANCE.checkSecurityRealms(manager.getKeystorePath());
+            ServerKeystoreReload.INSTANCE.reloadKeystore(manager.getKeystorePath());
         }
 
     }

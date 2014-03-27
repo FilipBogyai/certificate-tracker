@@ -5,7 +5,7 @@ import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
-import org.jboss.certificate.tracker.client.service.KeystoresTrackingManager;
+import org.jboss.certificate.tracker.core.KeystoresTrackingManager;
 import org.jboss.dmr.ModelNode;
 
 public class KeystoreRemoveHandler extends AbstractRemoveStepHandler{

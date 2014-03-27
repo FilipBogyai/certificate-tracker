@@ -1,4 +1,4 @@
-package org.jboss.certificate.tracker.client.cert;
+package org.jboss.certificate.tracker.client.dogtag;
 
 import java.net.URISyntaxException;
 import java.security.KeyStore;

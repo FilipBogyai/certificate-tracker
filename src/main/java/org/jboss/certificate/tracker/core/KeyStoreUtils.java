@@ -1,5 +1,5 @@
 
-package org.jboss.certificate.tracker.client.service;
+package org.jboss.certificate.tracker.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

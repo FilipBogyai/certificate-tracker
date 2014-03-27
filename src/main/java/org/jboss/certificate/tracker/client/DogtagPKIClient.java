@@ -1,4 +1,4 @@
-package org.jboss.certificate.tracker.client.service;
+package org.jboss.certificate.tracker.client;
 
 import java.net.URISyntaxException;
 import java.security.KeyStore;
@@ -6,10 +6,13 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.jboss.certificate.tracker.client.cert.CertClient;
-import org.jboss.certificate.tracker.client.cert.CertData;
-import org.jboss.certificate.tracker.client.cert.CertDataInfo;
-import org.jboss.certificate.tracker.client.cert.CertDataInfos;
+import org.jboss.certificate.tracker.client.dogtag.CertClient;
+import org.jboss.certificate.tracker.client.dogtag.CertData;
+import org.jboss.certificate.tracker.client.dogtag.CertDataInfo;
+import org.jboss.certificate.tracker.client.dogtag.CertDataInfos;
+import org.jboss.certificate.tracker.core.CertificateInfo;
+import org.jboss.certificate.tracker.core.KeyStoreUtils;
+import org.jboss.certificate.tracker.core.PKIClient;
 
 public class DogtagPKIClient implements PKIClient {
 

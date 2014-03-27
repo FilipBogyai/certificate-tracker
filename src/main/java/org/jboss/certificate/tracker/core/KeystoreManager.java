@@ -1,4 +1,4 @@
-package org.jboss.certificate.tracker.client.service;
+package org.jboss.certificate.tracker.core;
 
 import java.io.File;
 import java.io.FileOutputStream;

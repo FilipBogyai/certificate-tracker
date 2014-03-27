@@ -16,7 +16,7 @@
 // All rights reserved.
 // --- END COPYRIGHT BLOCK ---
 
-package org.jboss.certificate.tracker.client.cert;
+package org.jboss.certificate.tracker.client.dogtag;
 
 import java.util.ArrayList;
 import java.util.Collection;

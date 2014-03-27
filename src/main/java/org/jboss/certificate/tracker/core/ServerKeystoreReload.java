@@ -1,4 +1,4 @@
-package org.jboss.certificate.tracker.client.service;
+package org.jboss.certificate.tracker.core;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ALLOW_RESOURCE_SERVICE_RESTART;
@@ -24,12 +24,12 @@ import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
 import org.jboss.logging.Logger;
 
-public class ReloadKeystoreService {
+public class ServerKeystoreReload {
 
-    private final Logger log = Logger.getLogger(ReloadKeystoreService.class);
+    private final Logger log = Logger.getLogger(ServerKeystoreReload.class);
     private static ModelControllerClient client;
 
-    public static final ReloadKeystoreService INSTANCE = new ReloadKeystoreService();
+    public static final ServerKeystoreReload INSTANCE = new ServerKeystoreReload();
 
     public void setManagementClient(ModelControllerClient controllerClient) {
         client = controllerClient;

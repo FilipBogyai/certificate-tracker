@@ -8,7 +8,7 @@ import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
-import org.jboss.certificate.tracker.client.service.KeystoresTrackingManager;
+import org.jboss.certificate.tracker.core.KeystoresTrackingManager;
 import org.jboss.dmr.ModelNode;
 import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceController;

@@ -1,4 +1,4 @@
-package org.jboss.certificate.tracker.client.cert;
+package org.jboss.certificate.tracker.client.dogtag;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
