@@ -10,12 +10,12 @@ public interface PKIClient {
      * 
      * @param id
      */
-    public X509Certificate getCert(String id);
+    public X509Certificate getCertificate(String id);
 
     /**
      * Get information about all available certificates
      * 
      */
-    public Collection<CertificateInfo> listCerts();
+    public Collection<CertificateInfo> listCertificates();
 
 }

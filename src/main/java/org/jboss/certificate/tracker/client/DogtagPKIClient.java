@@ -35,7 +35,7 @@ public class DogtagPKIClient implements PKIClient {
     }
 
     @Override
-    public X509Certificate getCert(String id) {
+    public X509Certificate getCertificate(String id) {
 
         CertData certData = certClient.getCert(Integer.parseInt(id));
         byte[] binaryCertificate = certData.getEncoded().getBytes();
@@ -44,7 +44,7 @@ public class DogtagPKIClient implements PKIClient {
     }
 
     @Override
-    public Collection<CertificateInfo> listCerts() {
+    public Collection<CertificateInfo> listCertificates() {
 
         CertDataInfos certDataInfos = certClient.listCerts(null, null, null, null, null);
         Collection<CertificateInfo> certificateInfos = new ArrayList<CertificateInfo>();

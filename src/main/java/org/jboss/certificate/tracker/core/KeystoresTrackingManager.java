@@ -43,7 +43,7 @@ public class KeystoresTrackingManager {
             if (trustStoreManagerName == null || trustStoreManagerName.equals("undefined")) {
                 pkiClient = new DogtagPKIClient(urlTarget);
             } else {
-                KeyStore trustStore = getKeystoreManager(trustStoreManagerName).getKeystore();
+                KeyStore trustStore = getKeystoreManager(trustStoreManagerName).getTrustStore();
                 pkiClient = new DogtagPKIClient(urlTarget, trustStore);
             }
         } catch (URISyntaxException ex) {
@@ -87,7 +87,7 @@ public class KeystoresTrackingManager {
         if (pkiClient == null) {
             initPKIClient();
         }
-        Collection<CertificateInfo> certificateInfos = pkiClient.listCerts();
+        Collection<CertificateInfo> certificateInfos = pkiClient.listCertificates();
         
         for(KeystoreManager manager : keystoreManagers){
             
@@ -109,7 +109,7 @@ public class KeystoresTrackingManager {
 
                 if (hasSameSubjectDN(certificate, certificateInfo) && isUpdated(certificate, certificateInfo)) {
 
-                    X509Certificate newCertificate = pkiClient.getCert(certificateInfo.getAlias());
+                    X509Certificate newCertificate = pkiClient.getCertificate(certificateInfo.getAlias());
                     try {
                         manager.replaceCertificate(certificate, newCertificate);
                     } catch (Exception ex) {

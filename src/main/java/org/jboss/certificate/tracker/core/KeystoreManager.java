@@ -61,9 +61,16 @@ public class KeystoreManager {
         return keystorePath;
     }
 
-    public KeyStore getKeystore() {
+    public KeyStore getTrustStore() {
 
-        return keystore;
+        KeyStore trustStore = null;
+        try {
+            trustStore = KeyStoreUtils.createTrustStore();
+            KeyStoreUtils.copyCertificates(keystore, trustStore);
+        } catch (Exception ex) {
+            log.error("Unable to create trustStore from keystore manager: " + name, ex);
+        }
+        return trustStore;
     }
 
     public String[] getCertAliases() {
