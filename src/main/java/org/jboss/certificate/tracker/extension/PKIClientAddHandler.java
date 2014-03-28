@@ -3,6 +3,7 @@ package org.jboss.certificate.tracker.extension;
 import java.util.List;
 
 import org.jboss.as.controller.AbstractAddStepHandler;
+import org.jboss.as.controller.AttributeDefinition;
 import org.jboss.as.controller.ModelController;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
@@ -28,7 +29,12 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
 
     @Override
     protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
-        PKIClientDefinition.TIME_INTERVAL.validateAndSet(operation, model);
+        for (AttributeDefinition attr : PKIClientDefinition.ALL_ATTRIBUTES) {
+            attr.validateAndSet(operation, model);
+        }
+        if (model.hasDefined(PKIClientDefinition.MODULE.getName()) && !model.hasDefined(PKIClientDefinition.CODE.getName())) {
+            log.error("PKIClient has custom module bud no code available");
+        }
 
     }
 
@@ -39,7 +45,13 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
 
         String url = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
         long timeInterval = PKIClientDefinition.TIME_INTERVAL.resolveModelAttribute(context, model).asLong();
-        String truststoreName = PKIClientDefinition.TRUSTSTORE_NAME.resolveModelAttribute(context, model).asString();
+        ModelNode truststoreNode = PKIClientDefinition.TRUSTSTORE_NAME.resolveModelAttribute(context, model);
+        ModelNode codeNode = PKIClientDefinition.CODE.resolveModelAttribute(context, model);
+        ModelNode modulNode = PKIClientDefinition.MODULE.resolveModelAttribute(context, model);
+
+        String truststoreName = truststoreNode.isDefined() ? truststoreNode.asString() : null;
+        String code = codeNode.isDefined() ? codeNode.asString() : null;
+        String module = modulNode.isDefined() ? modulNode.asString() : null;
 
         final ManagementService serverControllerService = new ManagementService();
         ServiceController<ManagementService> serverServiceController = context.getServiceTarget()
@@ -49,7 +61,8 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
                 .install();
         newControllers.add(serverServiceController);
 
-        CertificateTrackingService certificateTrackingService = new CertificateTrackingService(url, truststoreName, timeInterval);
+        CertificateTrackingService certificateTrackingService = new CertificateTrackingService(url, truststoreName, timeInterval, code,
+                module);
         ServiceName serviceName = CertificateTrackingService.getServiceName();
         ServiceController<CertificateTrackingService> serviceController = context.getServiceTarget()
                 .addService(serviceName, certificateTrackingService)

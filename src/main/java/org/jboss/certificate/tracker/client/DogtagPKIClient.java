@@ -16,22 +16,36 @@ import org.jboss.certificate.tracker.core.PKIClient;
 
 public class DogtagPKIClient implements PKIClient {
 
-    CertClient certClient;
+    CertClient certClient = null;
+
+    public DogtagPKIClient() {
+
+    }
 
     public DogtagPKIClient(String urlTarget) throws URISyntaxException {
 
         certClient = new CertClient(urlTarget);
     }
 
-    public DogtagPKIClient(String urlTarget, String trustStorePath, String password, String keystoreType) throws URISyntaxException {
-
-        KeyStore trustStore = KeyStoreUtils.loadKeyStore(keystoreType, trustStorePath, password);
-        certClient = new CertClient(urlTarget, trustStore);
-    }
-
     public DogtagPKIClient(String urlTarget, KeyStore trustStore) throws URISyntaxException {
 
         certClient = new CertClient(urlTarget, trustStore);
+    }
+
+    @Override
+    public void init(String urlTarget, KeyStore trustStore) throws URISyntaxException {
+        if (trustStore == null) {
+            certClient = new CertClient(urlTarget);
+        } else {
+            certClient = new CertClient(urlTarget, trustStore);
+        }
+
+    }
+
+    @Override
+    public boolean isInitialized() {
+
+        return certClient != null;
     }
 
     @Override

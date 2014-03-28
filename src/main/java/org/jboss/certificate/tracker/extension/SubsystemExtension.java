@@ -60,6 +60,8 @@ public class SubsystemExtension implements Extension {
     protected static final String PKI_CLIENT = "pki-client";
     protected static final String TIME_INTERVAL = "time-interval";
     protected static final String TRUSTSTORE_NAME = "truststore-name";
+    protected static final String CODE = "code";
+    protected static final String MODULE = "module";
     protected static final String URL = "url";
 
     protected static final PathElement PKI_CLIENT_PATH = PathElement.pathElement(PKI_CLIENT);
@@ -134,6 +136,13 @@ public class SubsystemExtension implements Extension {
 
             ModelNode entry2 = property.getValue();
             PKIClientDefinition.TRUSTSTORE_NAME.marshallAsAttribute(entry2, true, writer);
+
+            ModelNode entry3 = property.getValue();
+            PKIClientDefinition.CODE.marshallAsAttribute(entry3, true, writer);
+
+            ModelNode entry4 = property.getValue();
+            PKIClientDefinition.MODULE.marshallAsAttribute(entry4, true, writer);
+
             writer.writeEndElement();
 
             writer.writeEndElement();
@@ -223,6 +232,10 @@ public class SubsystemExtension implements Extension {
                     PKIClientDefinition.TIME_INTERVAL.parseAndSetParameter(value, addPKIClientOperation, reader);
                 } else if (attribute.equals(TRUSTSTORE_NAME)) {
                     PKIClientDefinition.TRUSTSTORE_NAME.parseAndSetParameter(value, addPKIClientOperation, reader);
+                } else if (attribute.equals(CODE)) {
+                    PKIClientDefinition.CODE.parseAndSetParameter(value, addPKIClientOperation, reader);
+                } else if (attribute.equals(MODULE)) {
+                    PKIClientDefinition.MODULE.parseAndSetParameter(value, addPKIClientOperation, reader);
                 } else {
                     throw ParseUtils.unexpectedAttribute(reader, i);
                 }

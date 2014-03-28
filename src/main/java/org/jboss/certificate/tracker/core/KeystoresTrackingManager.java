@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.jboss.certificate.tracker.client.DogtagPKIClient;
 import org.jboss.logging.Logger;
+import org.jboss.modules.Module;
+import org.jboss.modules.ModuleIdentifier;
+import org.jboss.modules.ModuleLoader;
 
 public class KeystoresTrackingManager {
 
@@ -18,6 +20,8 @@ public class KeystoresTrackingManager {
     private PKIClient pkiClient;
     private String urlTarget;
     private String trustStoreManagerName;
+    private String code;
+    private String module;
 
     private final Logger log = Logger.getLogger(KeystoresTrackingManager.class);
 
@@ -27,6 +31,8 @@ public class KeystoresTrackingManager {
         pkiClient = null;
         trustStoreManagerName = null;
         keystoreManagers = new ArrayList<KeystoreManager>();
+        code = null;
+        module = null;
     }
     
     public void setUrlTarget(String urlTarget) {
@@ -36,16 +42,45 @@ public class KeystoresTrackingManager {
     public void setTrustStoreManagerName(String trustStoreManagerName) {
         this.trustStoreManagerName = trustStoreManagerName;
     }
+    
+    public void setCode(String code) {
+        this.code = code;
+    }
+    
+    public void setModule(String module) {
+        this.module = module;
+    }
 
     private void initPKIClient() {
-
-        try {
-            if (trustStoreManagerName == null || trustStoreManagerName.equals("undefined")) {
-                pkiClient = new DogtagPKIClient(urlTarget);
+        
+        KeyStore trustStore = null;
+        if (!(trustStoreManagerName == null || trustStoreManagerName.isEmpty())) {
+             trustStore = getKeystoreManager(trustStoreManagerName).getTrustStore();
+        }        
+        try{
+            if(code == null || code.isEmpty()){
+                pkiClient = PKIClientFactory.get();
+                pkiClient.init(urlTarget, trustStore);
+                
+            }else if(module == null){
+                            
+                ClassLoader classLoader = KeystoresTrackingManager.class.getClassLoader();
+                pkiClient = PKIClientFactory.get(classLoader, code);
+                pkiClient.init(urlTarget, trustStore);
+               
             } else {
-                KeyStore trustStore = getKeystoreManager(trustStoreManagerName).getTrustStore();
-                pkiClient = new DogtagPKIClient(urlTarget, trustStore);
-            }
+                try {
+                    ModuleLoader loader = Module.getCallerModuleLoader();
+                    Module customModule = loader.loadModule(ModuleIdentifier.fromString(module));
+                    ClassLoader classLoader = customModule.getClassLoader();
+                    pkiClient = PKIClientFactory.get(classLoader, code);
+                } catch (Exception e) {
+                    log.error("Cannot load module for custom PKIClient");
+                }
+                
+                pkiClient.init(urlTarget, trustStore);
+            }       
+    
         } catch (URISyntaxException ex) {
             log.error("URL of CA is wrong: " + ex);
         }
@@ -62,7 +97,12 @@ public class KeystoresTrackingManager {
 
     public void addKeystore(String name, String keystorePath, String keystoreType, String password, String aliases) {
         
-        KeystoreManager keystoreManager = new KeystoreManager(name, keystorePath, keystoreType, password, aliases);
+        KeystoreManager keystoreManager;
+        if (aliases == null) {
+            keystoreManager = new KeystoreManager(name, keystorePath, keystoreType, password);
+        } else {
+            keystoreManager = new KeystoreManager(name, keystorePath, keystoreType, password, aliases);
+        }
         addKeystoreManager(keystoreManager);
     }
     

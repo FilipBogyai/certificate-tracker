@@ -101,7 +101,7 @@ public class KeystoreManager {
 
     public List<X509Certificate> getManagedKeystoreCertificates() throws KeyStoreException {
 
-        if (managedAliases[0].isEmpty() || managedAliases[0].equals("undefined")) {
+        if (managedAliases == null || managedAliases[0].isEmpty()) {
             return getAllKeystoreCertificates();
         }
 

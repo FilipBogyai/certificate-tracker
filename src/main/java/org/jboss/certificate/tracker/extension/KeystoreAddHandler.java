@@ -40,7 +40,10 @@ public class KeystoreAddHandler extends AbstractAddStepHandler {
         String path = KeystoreDefinition.PATH.resolveModelAttribute(context, model).asString();
         String password = KeystoreDefinition.PASSWORD.resolveModelAttribute(context, model).asString();
         String type = KeystoreDefinition.TYPE.resolveModelAttribute(context, model).asString();
-        String aliases = KeystoreDefinition.ALIASES.resolveModelAttribute(context, model).asString();
+
+        ModelNode aliasesNode = KeystoreDefinition.ALIASES.resolveModelAttribute(context, model);
+        String aliases = aliasesNode.isDefined() ? aliasesNode.toString() : null;
+
         // add keystore manager to service
         log.info("Adding new keystore to certificate-tracker: " + name + " : " + path);
         KeystoresTrackingManager.INSTANCE.addKeystore(name, path, type, password, aliases);
