@@ -1,7 +1,6 @@
 package org.jboss.certificate.tracker.core;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
@@ -12,6 +11,7 @@ import java.util.List;
 import org.jboss.logging.Logger;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleIdentifier;
+import org.jboss.modules.ModuleLoadException;
 import org.jboss.modules.ModuleLoader;
 
 public class KeystoresTrackingManager {
@@ -57,33 +57,30 @@ public class KeystoresTrackingManager {
         if (!(trustStoreManagerName == null || trustStoreManagerName.isEmpty())) {
              trustStore = getKeystoreManager(trustStoreManagerName).getTrustStore();
         }        
-        try{
-            if(code == null || code.isEmpty()){
-                pkiClient = PKIClientFactory.get();
-                pkiClient.init(urlTarget, trustStore);
+
+        if (code == null || code.isEmpty()) {
+            pkiClient = PKIClientFactory.get();
+            pkiClient.init(urlTarget, trustStore);
                 
-            }else if(module == null){
+        } else if (module == null) {
                             
-                ClassLoader classLoader = KeystoresTrackingManager.class.getClassLoader();
-                pkiClient = PKIClientFactory.get(classLoader, code);
-                pkiClient.init(urlTarget, trustStore);
+            ClassLoader classLoader = KeystoresTrackingManager.class.getClassLoader();
+            pkiClient = PKIClientFactory.get(classLoader, code);
+            pkiClient.init(urlTarget, trustStore);
                
-            } else {
-                try {
-                    ModuleLoader loader = Module.getCallerModuleLoader();
-                    Module customModule = loader.loadModule(ModuleIdentifier.fromString(module));
-                    ClassLoader classLoader = customModule.getClassLoader();
-                    pkiClient = PKIClientFactory.get(classLoader, code);
-                } catch (Exception e) {
-                    log.error("Cannot load module for custom PKIClient");
-                }
+        } else {
+            try {
+                ModuleLoader loader = Module.getCallerModuleLoader();
+                Module customModule = loader.loadModule(ModuleIdentifier.fromString(module));
+                ClassLoader classLoader = customModule.getClassLoader();
+                pkiClient = PKIClientFactory.get(classLoader, code);
+            } catch (ModuleLoadException ex) {
+                log.error("Cannot load module for custom PKIClient", ex);
+            }
                 
-                pkiClient.init(urlTarget, trustStore);
-            }       
-    
-        } catch (URISyntaxException ex) {
-            log.error("URL of CA is wrong: " + ex);
+            pkiClient.init(urlTarget, trustStore);
         }
+
     }
 
     private KeystoreManager getKeystoreManager(String name) {

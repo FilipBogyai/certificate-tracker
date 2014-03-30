@@ -1,6 +1,5 @@
 package org.jboss.certificate.tracker.core;
 
-import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -13,7 +12,7 @@ public interface PKIClient {
      * @param url
      * @param trustStore
      */
-    void init(String url, KeyStore trustStore) throws URISyntaxException;
+    void init(String url, KeyStore trustStore);
 
     /**
      * Determine if the PKI client is initialized
