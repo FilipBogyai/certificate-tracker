@@ -8,11 +8,11 @@ import org.jboss.as.controller.AbstractRemoveStepHandler;
  * 
  * @author Filip Bogyai
  */
-class SubsystemRemove extends AbstractRemoveStepHandler {
+class CertificateTrackerRemove extends AbstractRemoveStepHandler {
 
-    static final SubsystemRemove INSTANCE = new SubsystemRemove();
+    static final CertificateTrackerRemove INSTANCE = new CertificateTrackerRemove();
 
-    private SubsystemRemove() {
+    private CertificateTrackerRemove() {
     }
 
 }

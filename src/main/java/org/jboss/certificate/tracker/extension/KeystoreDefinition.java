@@ -13,38 +13,38 @@ public class KeystoreDefinition extends SimpleResourceDefinition {
     public static final KeystoreDefinition INSTANCE = new KeystoreDefinition();
 
     protected static final SimpleAttributeDefinition PATH = 
-            new SimpleAttributeDefinitionBuilder(SubsystemExtension.PATH,
+            new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.PATH,
             ModelType.STRING).
             setAllowExpression(true).
-            setXmlName(SubsystemExtension.PATH).
+            setXmlName(CertificateTrackerExtension.PATH).
             setAllowNull(false).
             build();
     
     protected static final SimpleAttributeDefinition PASSWORD = 
-            new SimpleAttributeDefinitionBuilder(SubsystemExtension.PASSWORD,
+            new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.PASSWORD,
             ModelType.STRING).
             setAllowExpression(true).
-            setXmlName(SubsystemExtension.PASSWORD).
+            setXmlName(CertificateTrackerExtension.PASSWORD).
             setAllowNull(false).
             build();
 
     protected static final SimpleAttributeDefinition TYPE = 
-            new SimpleAttributeDefinitionBuilder(SubsystemExtension.TYPE, ModelType.STRING)
+            new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.TYPE, ModelType.STRING)
             .setAllowExpression(true)
-            .setXmlName(SubsystemExtension.TYPE)
+            .setXmlName(CertificateTrackerExtension.TYPE)
             .setDefaultValue(new ModelNode("JKS"))
             .setAllowNull(true)
             .build();
     
     protected static final SimpleAttributeDefinition ALIASES = 
-            new SimpleAttributeDefinitionBuilder(SubsystemExtension.ALIASES, ModelType.STRING)
+            new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.ALIASES, ModelType.STRING)
             .setAllowExpression(true)
-            .setXmlName(SubsystemExtension.ALIASES)
+            .setXmlName(CertificateTrackerExtension.ALIASES)
             .setAllowNull(true)            
             .build();
 
     private KeystoreDefinition() {
-        super(SubsystemExtension.KEYSTORE_PATH, SubsystemExtension.getResourceDescriptionResolver(SubsystemExtension.KEYSTORE),
+        super(CertificateTrackerExtension.KEYSTORE_PATH, CertificateTrackerExtension.getResourceDescriptionResolver(CertificateTrackerExtension.KEYSTORE),
                 KeystoreAddHandler.INSTANCE, KeystoreRemoveHandler.INSTANCE);
     }
 

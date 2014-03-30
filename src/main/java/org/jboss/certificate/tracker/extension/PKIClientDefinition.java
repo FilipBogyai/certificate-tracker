@@ -16,31 +16,31 @@ public class PKIClientDefinition extends SimpleResourceDefinition {
     public static final int DEFAULT_TIME_INTERVAL = 60000;
 
     protected static final SimpleAttributeDefinition TIME_INTERVAL =
-            new SimpleAttributeDefinitionBuilder(SubsystemExtension.TIME_INTERVAL, ModelType.LONG)
+            new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.TIME_INTERVAL, ModelType.LONG)
             .setAllowExpression(true)
-            .setXmlName(SubsystemExtension.TIME_INTERVAL)
+            .setXmlName(CertificateTrackerExtension.TIME_INTERVAL)
             .setDefaultValue(new ModelNode(DEFAULT_TIME_INTERVAL))
             .setAllowNull(true)
             .build();
     
     protected static final SimpleAttributeDefinition TRUSTSTORE_NAME =
-            new SimpleAttributeDefinitionBuilder(SubsystemExtension.TRUSTSTORE_NAME, ModelType.STRING)
+            new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.TRUSTSTORE_NAME, ModelType.STRING)
             .setAllowExpression(true)
-            .setXmlName(SubsystemExtension.TRUSTSTORE_NAME)            
+            .setXmlName(CertificateTrackerExtension.TRUSTSTORE_NAME)            
             .setAllowNull(true)
             .build();
     
     protected static final SimpleAttributeDefinition CODE = 
-            new SimpleAttributeDefinitionBuilder(SubsystemExtension.CODE, ModelType.STRING)
+            new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.CODE, ModelType.STRING)
             .setAllowExpression(true)
-            .setXmlName(SubsystemExtension.CODE)            
+            .setXmlName(CertificateTrackerExtension.CODE)            
             .setAllowNull(true)            
             .build();
     
     protected static final SimpleAttributeDefinition MODULE = 
-            new SimpleAttributeDefinitionBuilder(SubsystemExtension.MODULE, ModelType.STRING)
+            new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.MODULE, ModelType.STRING)
             .setAllowExpression(true)
-            .setXmlName(SubsystemExtension.MODULE)            
+            .setXmlName(CertificateTrackerExtension.MODULE)            
             .setAllowNull(true)
             .setRequires(CODE.getName())
             .build();
@@ -48,7 +48,7 @@ public class PKIClientDefinition extends SimpleResourceDefinition {
     public static AttributeDefinition[] ALL_ATTRIBUTES = new AttributeDefinition[] { TIME_INTERVAL, TRUSTSTORE_NAME, CODE, MODULE };
 
     private PKIClientDefinition() {
-        super(SubsystemExtension.PKI_CLIENT_PATH, SubsystemExtension.getResourceDescriptionResolver(SubsystemExtension.PKI_CLIENT),
+        super(CertificateTrackerExtension.PKI_CLIENT_PATH, CertificateTrackerExtension.getResourceDescriptionResolver(CertificateTrackerExtension.PKI_CLIENT),
                 PKIClientAddHandler.INSTANCE, PKIClientRemoveHandler.INSTANCE);
     }
 

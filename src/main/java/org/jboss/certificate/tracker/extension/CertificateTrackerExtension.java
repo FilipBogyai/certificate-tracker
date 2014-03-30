@@ -33,7 +33,7 @@ import org.jboss.staxmapper.XMLExtendedStreamWriter;
 /**
  * @author Filip Bogyai
  */
-public class SubsystemExtension implements Extension {
+public class CertificateTrackerExtension implements Extension {
 
     /**
      * The name space used for the {@code substystem} element
@@ -67,11 +67,11 @@ public class SubsystemExtension implements Extension {
     protected static final PathElement PKI_CLIENT_PATH = PathElement.pathElement(PKI_CLIENT);
     protected static final PathElement KEYSTORE_PATH = PathElement.pathElement(KEYSTORE);
     protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
-    private static final String RESOURCE_NAME = SubsystemExtension.class.getPackage().getName() + ".LocalDescriptions";
+    private static final String RESOURCE_NAME = CertificateTrackerExtension.class.getPackage().getName() + ".LocalDescriptions";
 
     static StandardResourceDescriptionResolver getResourceDescriptionResolver(final String keyPrefix) {
         String prefix = SUBSYSTEM_NAME + (keyPrefix == null ? "" : "." + keyPrefix);
-        return new StandardResourceDescriptionResolver(prefix, RESOURCE_NAME, SubsystemExtension.class.getClassLoader(), true, false);
+        return new StandardResourceDescriptionResolver(prefix, RESOURCE_NAME, CertificateTrackerExtension.class.getClassLoader(), true, false);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class SubsystemExtension implements Extension {
     @Override
     public void initialize(ExtensionContext context) {
         final SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, 1, 0);
-        final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(SubsystemDefinition.INSTANCE);
+        final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(CertificateTrackerDefinition.INSTANCE);
 
         registration.registerSubModel(KeystoreDefinition.INSTANCE);
         registration.registerSubModel(PKIClientDefinition.INSTANCE);
@@ -101,7 +101,7 @@ public class SubsystemExtension implements Extension {
          */
         @Override
         public void writeContent(XMLExtendedStreamWriter writer, SubsystemMarshallingContext context) throws XMLStreamException {
-            context.startSubsystemElement(SubsystemExtension.NAMESPACE, false);
+            context.startSubsystemElement(CertificateTrackerExtension.NAMESPACE, false);
             writer.writeStartElement(KEYSTORES);
             ModelNode node = context.getModelNode();
             ModelNode path = node.get(KEYSTORE);

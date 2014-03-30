@@ -10,16 +10,16 @@ import org.jboss.as.controller.registry.OperationEntry;
 /**
  * @author Filip Bogyai
  */
-public class SubsystemDefinition extends SimpleResourceDefinition {
-    public static final SubsystemDefinition INSTANCE = new SubsystemDefinition();
+public class CertificateTrackerDefinition extends SimpleResourceDefinition {
+    public static final CertificateTrackerDefinition INSTANCE = new CertificateTrackerDefinition();
 
-    private SubsystemDefinition() {
-        super(SubsystemExtension.SUBSYSTEM_PATH,
-                SubsystemExtension.getResourceDescriptionResolver(null),
+    private CertificateTrackerDefinition() {
+        super(CertificateTrackerExtension.SUBSYSTEM_PATH,
+                CertificateTrackerExtension.getResourceDescriptionResolver(null),
                 //We always need to add an 'add' operation
-                SubsystemAdd.INSTANCE,
+                CertificateTrackerAdd.INSTANCE,
                 //Every resource that is added, normally needs a remove operation
-                SubsystemRemove.INSTANCE);
+                CertificateTrackerRemove.INSTANCE);
     }
 
     @Override

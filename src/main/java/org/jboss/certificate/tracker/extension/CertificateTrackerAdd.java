@@ -15,11 +15,11 @@ import org.jboss.msc.service.ServiceController;
  * 
  * @author Filip Bogyai
  */
-class SubsystemAdd extends AbstractBoottimeAddStepHandler {
+class CertificateTrackerAdd extends AbstractBoottimeAddStepHandler {
 
-    static final SubsystemAdd INSTANCE = new SubsystemAdd();
+    static final CertificateTrackerAdd INSTANCE = new CertificateTrackerAdd();
 
-    private SubsystemAdd() {
+    private CertificateTrackerAdd() {
     }
 
     @Override

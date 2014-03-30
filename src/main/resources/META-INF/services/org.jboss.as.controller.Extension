@@ -1,1 +1,1 @@
-org.jboss.certificate.tracker.extension.SubsystemExtension
+org.jboss.certificate.tracker.extension.CertificateTrackerExtension
