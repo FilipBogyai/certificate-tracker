@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jboss.certificate.tracker.client.DogtagPKIClient;
 import org.jboss.logging.Logger;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleIdentifier;
@@ -20,7 +21,7 @@ public class KeystoresTrackingManager {
     private PKIClient pkiClient;
     private String urlTarget;
     private String trustStoreManagerName;
-    private String code;
+    private String name;
     private String module;
 
     private final Logger log = Logger.getLogger(KeystoresTrackingManager.class);
@@ -31,7 +32,7 @@ public class KeystoresTrackingManager {
         pkiClient = null;
         trustStoreManagerName = null;
         keystoreManagers = new ArrayList<KeystoreManager>();
-        code = null;
+        name = null;
         module = null;
     }
     
@@ -43,8 +44,8 @@ public class KeystoresTrackingManager {
         this.trustStoreManagerName = trustStoreManagerName;
     }
     
-    public void setCode(String code) {
-        this.code = code;
+    public void setName(String name) {
+        this.name = name;
     }
     
     public void setModule(String module) {
@@ -58,14 +59,14 @@ public class KeystoresTrackingManager {
              trustStore = getKeystoreManager(trustStoreManagerName).getTrustStore();
         }        
 
-        if (code == null || code.isEmpty()) {
-            pkiClient = PKIClientFactory.get();
+        if (name.equals(DogtagPKIClient.DOGTAG)) {
+            pkiClient = new DogtagPKIClient();
             pkiClient.init(urlTarget, trustStore);
                 
         } else if (module == null) {
                             
             ClassLoader classLoader = KeystoresTrackingManager.class.getClassLoader();
-            pkiClient = PKIClientFactory.get(classLoader, code);
+            pkiClient = PKIClientFactory.get(classLoader, name);
             pkiClient.init(urlTarget, trustStore);
                
         } else {
@@ -73,7 +74,7 @@ public class KeystoresTrackingManager {
                 ModuleLoader loader = Module.getCallerModuleLoader();
                 Module customModule = loader.loadModule(ModuleIdentifier.fromString(module));
                 ClassLoader classLoader = customModule.getClassLoader();
-                pkiClient = PKIClientFactory.get(classLoader, code);
+                pkiClient = PKIClientFactory.get(classLoader, name);
             } catch (ModuleLoadException ex) {
                 log.error("Cannot load module for custom PKIClient", ex);
             }

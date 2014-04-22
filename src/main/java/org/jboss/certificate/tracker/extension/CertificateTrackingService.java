@@ -18,16 +18,16 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
     private String url;
     private final String trustStoreName;
     private long timeInterval;
-    private final String code;
+    private final String name;
     private final String module;
     private Timer timer = null;
 
-    public CertificateTrackingService(String url, String trustStoreName, long timeInterval, String code, String module) {
+    public CertificateTrackingService(String url, String trustStoreName, long timeInterval, String name, String module) {
 
         this.url = url;
         this.trustStoreName = trustStoreName;
         this.timeInterval = timeInterval;
-        this.code = code;
+        this.name = name;
         this.module = module;
     }
 
@@ -49,7 +49,7 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
                     log.info("Checking certificates entires ");
                     KeystoresTrackingManager.INSTANCE.setUrlTarget(url);
                     KeystoresTrackingManager.INSTANCE.setTrustStoreManagerName(trustStoreName);
-                    KeystoresTrackingManager.INSTANCE.setCode(code);
+                    KeystoresTrackingManager.INSTANCE.setName(name);
                     KeystoresTrackingManager.INSTANCE.setModule(module);
                     try {
                         KeystoresTrackingManager.INSTANCE.updateAllKeystores();

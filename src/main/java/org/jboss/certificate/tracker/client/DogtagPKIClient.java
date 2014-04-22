@@ -17,6 +17,7 @@ import org.jboss.logging.Logger;
 
 public class DogtagPKIClient implements PKIClient {
 
+    public static final String DOGTAG = "Dogtag";
     private CertClient certClient = null;
     private final Logger log = Logger.getLogger(DogtagPKIClient.class);
 

@@ -30,22 +30,21 @@ public class PKIClientDefinition extends SimpleResourceDefinition {
             .setAllowNull(true)
             .build();
     
-    protected static final SimpleAttributeDefinition CODE = 
-            new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.CODE, ModelType.STRING)
+    protected static final SimpleAttributeDefinition URL = 
+            new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.URL, ModelType.STRING)
             .setAllowExpression(true)
-            .setXmlName(CertificateTrackerExtension.CODE)            
-            .setAllowNull(true)            
+            .setXmlName(CertificateTrackerExtension.URL)
+            .setAllowNull(false)
             .build();
     
     protected static final SimpleAttributeDefinition MODULE = 
             new SimpleAttributeDefinitionBuilder(CertificateTrackerExtension.MODULE, ModelType.STRING)
             .setAllowExpression(true)
             .setXmlName(CertificateTrackerExtension.MODULE)            
-            .setAllowNull(true)
-            .setRequires(CODE.getName())
+            .setAllowNull(true)            
             .build();
     
-    public static AttributeDefinition[] ALL_ATTRIBUTES = new AttributeDefinition[] { TIME_INTERVAL, TRUSTSTORE_NAME, CODE, MODULE };
+    public static AttributeDefinition[] ALL_ATTRIBUTES = new AttributeDefinition[] { TIME_INTERVAL, TRUSTSTORE_NAME, URL, MODULE };
 
     private PKIClientDefinition() {
         super(CertificateTrackerExtension.PKI_CLIENT_PATH, CertificateTrackerExtension.getResourceDescriptionResolver(CertificateTrackerExtension.PKI_CLIENT),
@@ -57,7 +56,7 @@ public class PKIClientDefinition extends SimpleResourceDefinition {
         // write attribute for time_interval
         resourceRegistration.registerReadWriteAttribute(TIME_INTERVAL, null, PKIClientTimeIntervalHandler.INSTANCE);
         resourceRegistration.registerReadWriteAttribute(TRUSTSTORE_NAME, null, new ReloadRequiredWriteAttributeHandler(TRUSTSTORE_NAME));
-        resourceRegistration.registerReadWriteAttribute(CODE, null, new ReloadRequiredWriteAttributeHandler(CODE));
+        resourceRegistration.registerReadWriteAttribute(URL, null, new ReloadRequiredWriteAttributeHandler(URL));
         resourceRegistration.registerReadWriteAttribute(MODULE, null, new ReloadRequiredWriteAttributeHandler(MODULE));
     }
 

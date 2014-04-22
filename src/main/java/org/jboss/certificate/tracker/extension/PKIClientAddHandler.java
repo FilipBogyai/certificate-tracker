@@ -32,10 +32,6 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
         for (AttributeDefinition attr : PKIClientDefinition.ALL_ATTRIBUTES) {
             attr.validateAndSet(operation, model);
         }
-        if (model.hasDefined(PKIClientDefinition.MODULE.getName()) && !model.hasDefined(PKIClientDefinition.CODE.getName())) {
-            log.error("PKIClient has custom module bud no code available");
-        }
-
     }
 
     @Override
@@ -43,14 +39,13 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
             final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers)
             throws OperationFailedException {
 
-        String url = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        String name = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        String url = PKIClientDefinition.URL.resolveModelAttribute(context, model).asString();
         long timeInterval = PKIClientDefinition.TIME_INTERVAL.resolveModelAttribute(context, model).asLong();
-        ModelNode truststoreNode = PKIClientDefinition.TRUSTSTORE_NAME.resolveModelAttribute(context, model);
-        ModelNode codeNode = PKIClientDefinition.CODE.resolveModelAttribute(context, model);
-        ModelNode modulNode = PKIClientDefinition.MODULE.resolveModelAttribute(context, model);
 
+        ModelNode truststoreNode = PKIClientDefinition.TRUSTSTORE_NAME.resolveModelAttribute(context, model);
         String truststoreName = truststoreNode.isDefined() ? truststoreNode.asString() : null;
-        String code = codeNode.isDefined() ? codeNode.asString() : null;
+        ModelNode modulNode = PKIClientDefinition.MODULE.resolveModelAttribute(context, model);
         String module = modulNode.isDefined() ? modulNode.asString() : null;
 
         final ManagementService serverControllerService = new ManagementService();
@@ -61,7 +56,7 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
                 .install();
         newControllers.add(serverServiceController);
 
-        CertificateTrackingService certificateTrackingService = new CertificateTrackingService(url, truststoreName, timeInterval, code,
+        CertificateTrackingService certificateTrackingService = new CertificateTrackingService(url, truststoreName, timeInterval, name,
                 module);
         ServiceName serviceName = CertificateTrackingService.getServiceName();
         ServiceController<CertificateTrackingService> serviceController = context.getServiceTarget()

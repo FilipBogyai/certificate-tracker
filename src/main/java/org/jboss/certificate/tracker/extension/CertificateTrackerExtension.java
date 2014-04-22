@@ -60,7 +60,6 @@ public class CertificateTrackerExtension implements Extension {
     protected static final String PKI_CLIENT = "pki-client";
     protected static final String TIME_INTERVAL = "time-interval";
     protected static final String TRUSTSTORE_NAME = "truststore-name";
-    protected static final String CODE = "code";
     protected static final String MODULE = "module";
     protected static final String URL = "url";
 
@@ -125,11 +124,11 @@ public class CertificateTrackerExtension implements Extension {
             }
             writer.writeEndElement();
 
-            ModelNode url = node.get(PKI_CLIENT);
-            Property property = url.asProperty();
+            ModelNode name = node.get(PKI_CLIENT);
+            Property property = name.asProperty();
 
             writer.writeStartElement(PKI_CLIENT);
-            writer.writeAttribute(URL, property.getName());
+            writer.writeAttribute(NAME, property.getName());
 
             ModelNode entry = property.getValue();
             PKIClientDefinition.TIME_INTERVAL.marshallAsAttribute(entry, true, writer);
@@ -138,7 +137,7 @@ public class CertificateTrackerExtension implements Extension {
             PKIClientDefinition.TRUSTSTORE_NAME.marshallAsAttribute(entry2, true, writer);
 
             ModelNode entry3 = property.getValue();
-            PKIClientDefinition.CODE.marshallAsAttribute(entry3, true, writer);
+            PKIClientDefinition.URL.marshallAsAttribute(entry3, true, writer);
 
             ModelNode entry4 = property.getValue();
             PKIClientDefinition.MODULE.marshallAsAttribute(entry4, true, writer);
@@ -222,18 +221,18 @@ public class CertificateTrackerExtension implements Extension {
             ModelNode addPKIClientOperation = new ModelNode();
             addPKIClientOperation.get(OP).set(ADD);
 
-            String url = null;
+            String name = null;
             for (int i = 0; i < reader.getAttributeCount(); i++) {
                 String attribute = reader.getAttributeLocalName(i);
                 String value = reader.getAttributeValue(i);
-                if (attribute.equals(URL)) {
-                    url = value;
+                if (attribute.equals(NAME)) {
+                    name = value;
                 } else if (attribute.equals(TIME_INTERVAL)) {
                     PKIClientDefinition.TIME_INTERVAL.parseAndSetParameter(value, addPKIClientOperation, reader);
                 } else if (attribute.equals(TRUSTSTORE_NAME)) {
                     PKIClientDefinition.TRUSTSTORE_NAME.parseAndSetParameter(value, addPKIClientOperation, reader);
-                } else if (attribute.equals(CODE)) {
-                    PKIClientDefinition.CODE.parseAndSetParameter(value, addPKIClientOperation, reader);
+                } else if (attribute.equals(URL)) {
+                    PKIClientDefinition.URL.parseAndSetParameter(value, addPKIClientOperation, reader);
                 } else if (attribute.equals(MODULE)) {
                     PKIClientDefinition.MODULE.parseAndSetParameter(value, addPKIClientOperation, reader);
                 } else {
@@ -241,11 +240,11 @@ public class CertificateTrackerExtension implements Extension {
                 }
             }
             ParseUtils.requireNoContent(reader);
-            if (url == null) {
-                throw ParseUtils.missingRequiredElement(reader, Collections.singleton(URL));
+            if (name == null) {
+                throw ParseUtils.missingRequiredElement(reader, Collections.singleton(NAME));
             }
 
-            PathAddress address = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(PKI_CLIENT, url));
+            PathAddress address = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(PKI_CLIENT, name));
             addPKIClientOperation.get(OP_ADDR).set(address.toModelNode());
             list.add(addPKIClientOperation);
         }
