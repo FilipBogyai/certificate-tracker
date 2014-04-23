@@ -4,7 +4,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.jboss.certificate.tracker.core.KeystoresTrackingManager;
-import org.jboss.logging.Logger;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.StartContext;
@@ -12,8 +11,6 @@ import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 
 public class CertificateTrackingService implements Service<CertificateTrackingService> {
-
-    private final Logger log = Logger.getLogger(CertificateTrackingService.class);
 
     private String url;
     private final String trustStoreName;
@@ -46,7 +43,7 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    log.info("Checking certificates entires ");
+                    CertificateTrackerLogger.LOGGER.checkingCertificates();
                     KeystoresTrackingManager.INSTANCE.setUrlTarget(url);
                     KeystoresTrackingManager.INSTANCE.setTrustStoreManagerName(trustStoreName);
                     KeystoresTrackingManager.INSTANCE.setName(name);
@@ -54,7 +51,7 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
                     try {
                         KeystoresTrackingManager.INSTANCE.updateAllKeystores();
                     } catch (Exception ex) {
-                        log.error(ex);
+                        CertificateTrackerLogger.LOGGER.checkingCertificatesError(ex);
                     }
                 }
             }, timeInterval, timeInterval);

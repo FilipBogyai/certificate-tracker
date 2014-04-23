@@ -53,6 +53,10 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                    <!-- Optional if you wan to generate skeleton translation properties files --> 
+                    <compilerArgument>  
+                        -AgeneratedTranslationFilesPath=${project.basedir}/target/generated-translation-files  
+                    </compilerArgument>
                 </configuration>
             </plugin>
             <plugin>
@@ -171,32 +175,7 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency> 
-        
-         <!--  This is from previous project 
-               <dependency>
-		        <groupId>org.apache.httpcomponents</groupId>
-		        <artifactId>httpcore</artifactId>
-		        <version>4.2</version>
-		      </dependency>
-		  
-		  	  <dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient</artifactId>
-				<version>4.2</version>		
-			  </dependency>
-		  
-			  <dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>1.3.2</version>		
-			  </dependency>
-			  			  
-			  <dependency>
-				<groupId>org.apache.directory.studio</groupId>
-				<artifactId>org.apache.commons.codec</artifactId>
-				<version>1.8</version>
-			</dependency> 
-		-->
+    
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-client</artifactId>
@@ -219,7 +198,14 @@
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-atom-provider</artifactId>
 				<version>3.0.6.Final</version>
-			</dependency>  
-			
-    </dependencies>
+			</dependency> 
+			 
+			<dependency>  
+				<groupId>org.jboss.logging</groupId>  
+				<artifactId>jboss-logging-processor</artifactId>  
+				<version>1.2.0.Final</version>         		
+			</dependency>          
+    </dependencies>     
+   	
+    
 </project>
