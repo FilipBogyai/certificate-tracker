@@ -10,14 +10,11 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.certificate.tracker.core.KeystoresTrackingManager;
 import org.jboss.dmr.ModelNode;
-import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceController;
 
 public class KeystoreAddHandler extends AbstractAddStepHandler {
 
     public static final KeystoreAddHandler INSTANCE = new KeystoreAddHandler();
-
-    private final Logger log = Logger.getLogger(KeystoreAddHandler.class);
 
     private KeystoreAddHandler() {
     }
@@ -45,7 +42,7 @@ public class KeystoreAddHandler extends AbstractAddStepHandler {
         String aliases = aliasesNode.isDefined() ? aliasesNode.toString() : null;
 
         // add keystore manager to service
-        log.info("Adding new keystore to certificate-tracker: " + name + " : " + path);
+        CertificateTrackerLogger.LOGGER.addingNewKeystore(name, path);
         KeystoresTrackingManager.INSTANCE.addKeystore(name, path, type, password, aliases);
 
     }

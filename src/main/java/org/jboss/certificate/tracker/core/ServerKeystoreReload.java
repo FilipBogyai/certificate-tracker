@@ -25,12 +25,11 @@ import java.io.IOException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.client.ModelControllerClient;
+import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
 import org.jboss.dmr.ModelNode;
-import org.jboss.logging.Logger;
 
 public class ServerKeystoreReload {
 
-    private final Logger log = Logger.getLogger(ServerKeystoreReload.class);
     private static ModelControllerClient client;
 
     public static final ServerKeystoreReload INSTANCE = new ServerKeystoreReload();
@@ -76,7 +75,7 @@ public class ServerKeystoreReload {
 
             // if there is same keystore, then reload service and continue
             if (keystorePath.equals(serverIdentityKeystore)) {
-                log.info("Reloading Server Identity for Security Realm: " + securityRealm);
+                CertificateTrackerLogger.LOGGER.reloadingIdentity(securityRealm);
                 reloadKeystoreInAddress(serverIdentityAdress, keystorePath);
                 continue;
             }
@@ -90,7 +89,7 @@ public class ServerKeystoreReload {
             String authenticationTruststore = result.get("result").asString();
 
             if (keystorePath.equals(authenticationTruststore)) {
-                log.info("Reloading authentication Truststore for Security Realm: " + securityRealm);
+                CertificateTrackerLogger.LOGGER.reloadingTrustStore(securityRealm);
                 reloadKeystoreInAddress(authenticationTruststoreAddress, keystorePath);
                 continue;
             }
@@ -104,7 +103,7 @@ public class ServerKeystoreReload {
             String authorizationTruststore = result.get("result").asString();
 
             if (keystorePath.equals(authorizationTruststore)) {
-                log.info("Reloading authorization Truststore for Security Realm: " + securityRealm);
+                CertificateTrackerLogger.LOGGER.reloadingAuthorzTrustStore(securityRealm);
                 reloadKeystoreInAddress(authorizationTruststoreAddress, keystorePath);
             }
         }
@@ -119,7 +118,7 @@ public class ServerKeystoreReload {
         reloadOpp.get(OPERATION_HEADERS, ALLOW_RESOURCE_SERVICE_RESTART).set(true);
         reloadOpp.get(OP_ADDR).set(address.toModelNode());
         ModelNode result = client.execute(reloadOpp);
-        log.debug(result.toString());
+        CertificateTrackerLogger.LOGGER.debug(result.toString());
     }
 
     public void checkSecurityDomains(String keystorePath) throws IOException {
@@ -158,8 +157,7 @@ public class ServerKeystoreReload {
                 reloadOpp.get(OPERATION_HEADERS, ALLOW_RESOURCE_SERVICE_RESTART).set(true);
                 reloadOpp.get(OP_ADDR).set(jsseTruststoreAddress.toModelNode());
                 ModelNode reloadResult = client.execute(reloadOpp);
-                log.debug(reloadResult.toString());
-
+                CertificateTrackerLogger.LOGGER.debug(reloadResult.toString());
             }
         }
     }

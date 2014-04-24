@@ -22,6 +22,8 @@ public class KeystoreRemoveHandler extends AbstractRemoveStepHandler{
 
         // remove keystore manager from service
         String name = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+
+        CertificateTrackerLogger.LOGGER.removingKeystore(name);
         KeystoresTrackingManager.INSTANCE.removeKeystoreManager(name);
     }
 

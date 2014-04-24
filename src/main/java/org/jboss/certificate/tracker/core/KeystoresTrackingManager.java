@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jboss.certificate.tracker.client.DogtagPKIClient;
-import org.jboss.logging.Logger;
+import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
@@ -23,8 +23,6 @@ public class KeystoresTrackingManager {
     private String trustStoreManagerName;
     private String name;
     private String module;
-
-    private final Logger log = Logger.getLogger(KeystoresTrackingManager.class);
 
     public static final KeystoresTrackingManager INSTANCE = new KeystoresTrackingManager();
 
@@ -76,7 +74,7 @@ public class KeystoresTrackingManager {
                 ClassLoader classLoader = customModule.getClassLoader();
                 pkiClient = PKIClientFactory.get(classLoader, name);
             } catch (ModuleLoadException ex) {
-                log.error("Cannot load module for custom PKIClient", ex);
+                CertificateTrackerLogger.LOGGER.moduleNotFound(ex);
             }
                 
             pkiClient.init(urlTarget, trustStore);
@@ -139,7 +137,7 @@ public class KeystoresTrackingManager {
         try {
             managedCertificates = manager.getManagedKeystoreCertificates();
         } catch (KeyStoreException ex) {
-            log.error("Cannot obtain keystore certificates:" + manager.getKeystorePath(), ex);
+            CertificateTrackerLogger.LOGGER.unableToLoadCertificates(manager.getName(), ex);
         }
         
         for(X509Certificate certificate: managedCertificates){
@@ -151,7 +149,8 @@ public class KeystoresTrackingManager {
                     try {
                         manager.replaceCertificate(certificate, newCertificate);
                     } catch (Exception ex) {
-                        log.error("Unable to update certificate: " + certificate.getSubjectDN().getName(), ex);
+                        CertificateTrackerLogger.LOGGER.unableToUpdateCertificate(certificate.getSubjectDN().getName(), 
+                                manager.getName(), ex);
                     }
                 }
             }

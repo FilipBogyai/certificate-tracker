@@ -12,14 +12,11 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.as.server.Services;
 import org.jboss.dmr.ModelNode;
-import org.jboss.logging.Logger;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.ServiceName;
 
 public class PKIClientAddHandler extends AbstractAddStepHandler {
-
-    private final Logger log = Logger.getLogger(PKIClientAddHandler.class);
 
     public static PKIClientAddHandler INSTANCE = new PKIClientAddHandler();
 
@@ -56,6 +53,8 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
                 .install();
         newControllers.add(serverServiceController);
 
+        CertificateTrackerLogger.LOGGER.addingPKIClient(name, url, Long.toString(timeInterval));
+
         CertificateTrackingService certificateTrackingService = new CertificateTrackingService(url, truststoreName, timeInterval, name,
                 module);
         ServiceName serviceName = CertificateTrackingService.getServiceName();
@@ -65,8 +64,6 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
                 .setInitialMode(Mode.ACTIVE)
                 .install();
         newControllers.add(serviceController);
-
-        log.info("Starting PKI tracking client to check certificates on URL: " + url + " with time interval " + timeInterval + "ms");
     }
 
 }

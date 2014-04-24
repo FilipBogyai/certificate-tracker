@@ -13,13 +13,12 @@ import org.jboss.certificate.tracker.client.dogtag.CertDataInfos;
 import org.jboss.certificate.tracker.core.CertificateInfo;
 import org.jboss.certificate.tracker.core.KeyStoreUtils;
 import org.jboss.certificate.tracker.core.PKIClient;
-import org.jboss.logging.Logger;
+import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
 
 public class DogtagPKIClient implements PKIClient {
 
     public static final String DOGTAG = "Dogtag";
     private CertClient certClient = null;
-    private final Logger log = Logger.getLogger(DogtagPKIClient.class);
 
     public DogtagPKIClient() {
 
@@ -41,7 +40,7 @@ public class DogtagPKIClient implements PKIClient {
             certClient = trustStore == null ? new CertClient(urlTarget) : new CertClient(urlTarget, trustStore);
 
         } catch (URISyntaxException ex) {
-            log.error("URL address of CA is wrong", ex);
+            CertificateTrackerLogger.LOGGER.invalidURL(ex);
         }
 
 

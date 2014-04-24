@@ -1,10 +1,8 @@
 package org.jboss.certificate.tracker.core;
 
-import org.jboss.logging.Logger;
+import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
 
 public class PKIClientFactory {
-
-    private static final Logger log = Logger.getLogger(PKIClientFactory.class);
 
     public static PKIClient get(ClassLoader classLoader, String name){
         
@@ -14,14 +12,14 @@ public class PKIClientFactory {
         try
         {
            loadedClass = classLoader.loadClass(name);
-        } catch (ClassNotFoundException e) {
-            log.error("Unable to find PKIClient class", e);
+        } catch (ClassNotFoundException ex) {
+            CertificateTrackerLogger.LOGGER.unableToFindClass(ex);
         }
         
         try {
             pkiClient = (PKIClient) loadedClass.newInstance();
-        } catch (Exception e) {
-            log.error("Unable to create new PKIClient", e);
+        } catch (Exception ex) {
+            CertificateTrackerLogger.LOGGER.unableToCreateClass(ex);
         }
         return pkiClient;
     }

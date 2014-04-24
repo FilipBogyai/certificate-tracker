@@ -16,11 +16,9 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.logging.Logger;
+import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
 
 public class KeystoreManager {
-
-    private final Logger log = Logger.getLogger(KeystoreManager.class);
 
     private final String name;
     private final String keystorePath;
@@ -68,7 +66,7 @@ public class KeystoreManager {
             trustStore = KeyStoreUtils.createTrustStore();
             KeyStoreUtils.copyCertificates(keystore, trustStore);
         } catch (Exception ex) {
-            log.error("Unable to create trustStore from keystore manager: " + name, ex);
+            CertificateTrackerLogger.LOGGER.unableToCreateTruststore(name, ex);
         }
         return trustStore;
     }
@@ -111,7 +109,7 @@ public class KeystoreManager {
                 X509Certificate certificate = getCertByAlias(managedAliases[i]);
                 keystoreCertificates.add(certificate);
             } catch (NullPointerException ex) {
-                log.error("Certificate with alias: '" + managedAliases[i] + "' was not found in keystore: " + keystorePath);
+                CertificateTrackerLogger.LOGGER.noCertificateWithAlias(managedAliases[i], name);
             }
 
         }
@@ -130,15 +128,14 @@ public class KeystoreManager {
             if (oldCertificate.getPublicKey().equals(newCertificate.getPublicKey())) {
                 setKeyEntryWithCertificate(alias, newCertificate);
                 isUpdated = true;
-                log.info("Certificate for KeyPair: " + alias + " has been updated in Keystore named: " + name);
+                CertificateTrackerLogger.LOGGER.updatedKeyCertificate(alias, name);
             } else {
-                log.debug("New certificate with SubjectDN: " + oldCertificate.getSubjectDN().getName()
-                        + " is available, but has different KeyPair. To update please import new KeyPair.");
+                CertificateTrackerLogger.LOGGER.differentKeyCertificate(oldCertificate.getSubjectDN().getName());
             }
         } else {
             keystore.setCertificateEntry(alias, newCertificate);
             isUpdated = true;
-            log.info("Certificate with alias: " + alias + " has been updated in Keystore named: " + name);
+            CertificateTrackerLogger.LOGGER.updatedCertificate(alias, name);
         }
     }
 
@@ -149,7 +146,7 @@ public class KeystoreManager {
             keystore.store(new FileOutputStream(keystoreFile), password.toCharArray());
             isUpdated = false;
         } catch (Exception ex) {
-            log.error("Unable to save keystore: " + keystorePath, ex);
+            CertificateTrackerLogger.LOGGER.unableToSaveKeystore(name, ex);
         }
 
     }
@@ -184,7 +181,7 @@ public class KeystoreManager {
                 }
 
                 if (!isCACertAvailable) {
-                    log.error("Cannot establish trusted path to root CA");
+                    CertificateTrackerLogger.LOGGER.untrustedRootCA(alias);
                 }
             }
 

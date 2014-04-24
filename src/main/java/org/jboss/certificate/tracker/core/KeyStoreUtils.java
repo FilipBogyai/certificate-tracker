@@ -27,7 +27,7 @@ import java.util.TreeSet;
 import javax.crypto.Cipher;
 
 import org.apache.commons.io.FileUtils;
-import org.jboss.logging.Logger;
+import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
 
 
 
@@ -38,8 +38,6 @@ import org.jboss.logging.Logger;
  */
 public class KeyStoreUtils {
 
-	private final static Logger LOGGER = Logger.getLogger(KeyStoreUtils.class);
-	
 	/**
 	 * Returns array of supported KeyStores
 	 * 
@@ -67,8 +65,8 @@ public class KeyStoreUtils {
 					tmpResult.add(tmpAlias);
                 // }
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+        } catch (Exception ex) {
+            CertificateTrackerLogger.LOGGER.cannotLoadCertificates(ex);
 			return null;
 		}
 		return tmpResult.toArray(new String[tmpResult.size()]);
@@ -136,8 +134,8 @@ public class KeyStoreUtils {
 				toKeyStore.setCertificateEntry(alias, fromKeyStore.getCertificate(alias));
 			}
 			return true;
-		} catch (KeyStoreException e) {
-			e.printStackTrace();
+        } catch (KeyStoreException ex) {
+            CertificateTrackerLogger.LOGGER.cannotCopyCertificates(ex);
 		}
 		return false;
 	}
@@ -170,8 +168,8 @@ public class KeyStoreUtils {
 			}
 			tmpKs.load(tmpIS, aKsPasswd);
 			fixAliases(tmpKs);
-		} catch (Exception e) {
-			e.printStackTrace();
+        } catch (Exception ex) {
+            CertificateTrackerLogger.LOGGER.cannotLoadKeystore(ex);
 			return null;
 		} finally {
 			if (tmpIS != null)
@@ -205,8 +203,8 @@ public class KeyStoreUtils {
 				k = KeyStore.getInstance("JKS", provider);
 			k.load(fin, null);
 			return k;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception ex) {
+            CertificateTrackerLogger.LOGGER.cannotLoadCAKeystore(ex);
 			return null;
 		} finally {
 			try {
@@ -227,7 +225,7 @@ public class KeyStoreUtils {
 	 */
 	public static X509Certificate loadCertificate(final String filePath) {
         if (filePath.isEmpty()) {
-			LOGGER.debug("Empty file path");
+			CertificateTrackerLogger.LOGGER.debug("Empty file path");
 			return null;
 		}
 		FileInputStream inStream = null;
@@ -236,8 +234,8 @@ public class KeyStoreUtils {
 			final CertificateFactory certFac = CertificateFactory.getInstance("X.509"); // X.509
 			inStream = FileUtils.openInputStream(new File(filePath));
 			cert = (X509Certificate) certFac.generateCertificate(inStream);
-		} catch (Exception e) {
-			LOGGER.debug("Unable to load certificate", e);
+        } catch (Exception ex) {
+            CertificateTrackerLogger.LOGGER.cannotLoadCertificate(ex);
 		} finally {
             try {
                 inStream.close();
@@ -263,9 +261,8 @@ public class KeyStoreUtils {
             final CertificateFactory certFac = CertificateFactory.getInstance("X.509"); // X.509
             binStream = new ByteArrayInputStream(source);
             cert = (X509Certificate) certFac.generateCertificate(binStream);
-        } catch (Exception e) {
-            // LOGGER.debug("Unable to load certificate", e);
-            System.out.println("chyba binarneho certifikatu");
+        } catch (Exception ex) {
+            CertificateTrackerLogger.LOGGER.cannotLoadBinaryCertificate(ex);
         } finally {
             try {
                 binStream.close();
@@ -290,8 +287,8 @@ public class KeyStoreUtils {
 			try {
 				Cipher.getInstance(cert.getPublicKey().getAlgorithm());
 				result = true;
-			} catch (Exception e) {
-				LOGGER.debug("Not possible to encrypt with the certificate", e);
+            } catch (Exception ex) {
+                CertificateTrackerLogger.LOGGER.cannotEncryptWithCertificate(ex);
 			}
 		}
 		return result;
