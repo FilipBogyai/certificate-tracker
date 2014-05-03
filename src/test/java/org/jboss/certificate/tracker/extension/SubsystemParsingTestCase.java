@@ -46,8 +46,10 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
                       "<keystore name=\"example\" path=\"" + getResourcesPath("example.keystore") + "\" type=\"JKS\" password=\"secret\" />" +
                       "<keystore name=\"test\" path=\"" + getResourcesPath("test.keystore") + "\" type=\"JKS\" password=\"secret\" />" +
                   "</keystores>" +
- "<pki-client name =\"Dogtag\" url=\"http://example.com\" time-interval=\"3000\" truststore-name=\"example\" />"
-                +
+                  "<pki-client name =\"Dogtag\"  time-interval=\"3000\" >" +
+                    "<client-option name=\"url\" value=\"http://example.com\" />" +
+                    "<client-option name=\"truststore-name\" value=\"example\" />" + 
+                  "</pki-client>" +
                 "</subsystem>";
     }
 
@@ -128,11 +130,16 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         
         Assert.assertTrue(model.get(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME).hasDefined("pki-client"));
         Assert.assertTrue(model.get(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME, "pki-client").hasDefined("Dogtag"));
-        Assert.assertTrue(model.get(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME, "pki-client", "Dogtag").hasDefined("url"));
-        Assert.assertEquals("http://example.com", model.get(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME, "pki-client", "Dogtag", "url").asString());
+
         Assert.assertTrue(model.get(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME, "pki-client", "Dogtag").hasDefined("time-interval"));
         Assert.assertEquals("3000",
                 model.get(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME, "pki-client", "Dogtag", "time-interval").asString());
+        Assert.assertTrue(model.get(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME, "pki-client", "Dogtag").hasDefined(
+                "client-options"));
+        Assert.assertEquals("(\"url\" => \"http://example.com\")",
+                model.get(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME, "pki-client", "Dogtag", "client-options").asList().get(0).toString());
+        Assert.assertEquals("(\"truststore-name\" => \"example\")",
+                model.get(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME, "pki-client", "Dogtag", "client-options").asList().get(1).toString());
     }
 
     /**
@@ -148,7 +155,6 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         // Get the model and the persisted xml from the first controller
         ModelNode modelA = servicesA.readWholeModel();
         String marshalled = servicesA.getPersistedSubsystemXml();
-        System.out.println(marshalled);
         // Install the persisted xml from the first controller into a second
         // controller
         KernelServices servicesB = super.installInController(marshalled);
@@ -213,7 +219,10 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
 
         String subsystemXml = "<subsystem xmlns=\"" + CertificateTrackerExtension.NAMESPACE + "\">" + "<keystores>" + "<keystore name=\"example\" path=\""
                 + getResourcesPath("example.keystore") + "\" type=\"JKS\" password=\"secret\" />" + "</keystores>"
-                + "<pki-client name=\"Dogtag\" url=\"http://example.com\" />" + "</subsystem>";
+                + "<pki-client name=\"Dogtag\" >" +
+                    "<client-option name=\"url\" value=\"http://example.com\" />" +
+                    "<client-option name=\"truststore-name\" value=\"example\" />" + 
+                  "</pki-client>" + "</subsystem>";
 
         KernelServices services = super.installInController(subsystemXml);
 

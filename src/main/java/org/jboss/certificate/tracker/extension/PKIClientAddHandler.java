@@ -1,6 +1,8 @@
 package org.jboss.certificate.tracker.extension;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.as.controller.AbstractAddStepHandler;
 import org.jboss.as.controller.AttributeDefinition;
@@ -37,13 +39,17 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
             throws OperationFailedException {
 
         String name = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        String url = PKIClientDefinition.URL.resolveModelAttribute(context, model).asString();
         long timeInterval = PKIClientDefinition.TIME_INTERVAL.resolveModelAttribute(context, model).asLong();
 
-        ModelNode truststoreNode = PKIClientDefinition.TRUSTSTORE_NAME.resolveModelAttribute(context, model);
-        String truststoreName = truststoreNode.isDefined() ? truststoreNode.asString() : null;
         ModelNode modulNode = PKIClientDefinition.MODULE.resolveModelAttribute(context, model);
         String module = modulNode.isDefined() ? modulNode.asString() : null;
+
+        Map<String, Object> clientOptions = new HashMap<String, Object>();
+        if (operation.hasDefined(PKIClientDefinition.CLIENT_OPTIONS.getName())) {
+            for (Map.Entry<String, String> clientOption : PKIClientDefinition.CLIENT_OPTIONS.unwrap(context, model).entrySet()) {
+                clientOptions.put(clientOption.getKey(), clientOption.getValue());
+            }
+        }
 
         final ManagementService serverControllerService = new ManagementService();
         ServiceController<ManagementService> serverServiceController = context.getServiceTarget()
@@ -53,10 +59,9 @@ public class PKIClientAddHandler extends AbstractAddStepHandler {
                 .install();
         newControllers.add(serverServiceController);
 
-        CertificateTrackerLogger.LOGGER.addingPKIClient(name, url, Long.toString(timeInterval));
+        CertificateTrackerLogger.LOGGER.addingPKIClient(name, Long.toString(timeInterval));
 
-        CertificateTrackingService certificateTrackingService = new CertificateTrackingService(url, truststoreName, timeInterval, name,
-                module);
+        CertificateTrackingService certificateTrackingService = new CertificateTrackingService(name, timeInterval, module, clientOptions);
         ServiceName serviceName = CertificateTrackingService.getServiceName();
         ServiceController<CertificateTrackingService> serviceController = context.getServiceTarget()
                 .addService(serviceName, certificateTrackingService)

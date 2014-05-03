@@ -5,6 +5,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import org.jboss.certificate.tracker.client.dogtag.CertClient;
 import org.jboss.certificate.tracker.client.dogtag.CertData;
@@ -12,12 +13,15 @@ import org.jboss.certificate.tracker.client.dogtag.CertDataInfo;
 import org.jboss.certificate.tracker.client.dogtag.CertDataInfos;
 import org.jboss.certificate.tracker.core.CertificateInfo;
 import org.jboss.certificate.tracker.core.KeyStoreUtils;
+import org.jboss.certificate.tracker.core.KeystoresTrackingManager;
 import org.jboss.certificate.tracker.core.PKIClient;
 import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
 
 public class DogtagPKIClient implements PKIClient {
 
     public static final String DOGTAG = "Dogtag";
+    public static final String URL = "url";
+    public static final String TRUSTSTORE_NAME = "truststore-name";
     private CertClient certClient = null;
 
     public DogtagPKIClient() {
@@ -35,15 +39,18 @@ public class DogtagPKIClient implements PKIClient {
     }
 
     @Override
-    public void init(String urlTarget, KeyStore trustStore) {
+    public void init(Map<String, Object> options) {
         try {
-            certClient = trustStore == null ? new CertClient(urlTarget) : new CertClient(urlTarget, trustStore);
+
+            String url = (String) options.get(URL);
+            String trustStoreName = (String) options.get(TRUSTSTORE_NAME);
+            KeyStore trustStore = KeystoresTrackingManager.INSTANCE.getTrustStore(trustStoreName);
+
+            certClient = trustStore == null ? new CertClient(url) : new CertClient(url, trustStore);
 
         } catch (URISyntaxException ex) {
             CertificateTrackerLogger.LOGGER.invalidURL(ex);
         }
-
-
     }
 
     @Override

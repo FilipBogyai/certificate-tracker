@@ -30,8 +30,8 @@ public interface CertificateTrackerLogger extends BasicLogger {
     void removingKeystore(String name);
 
     @LogMessage(level = Level.INFO)
-    @Message(id = 10004, value = "Starting PKI client %s to check certificates on URL: %s with time interval %s ms")
-    void addingPKIClient(String name, String url, String time);
+    @Message(id = 10004, value = "Starting PKI client %s to check certificates with time interval %s ms")
+    void addingPKIClient(String name, String time);
 
     @LogMessage(level = Level.INFO)
     @Message(id = 10005, value = "Stopping PKI client %s")

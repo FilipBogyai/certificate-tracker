@@ -1,18 +1,17 @@
 package org.jboss.certificate.tracker.core;
 
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Map;
 
 public interface PKIClient {
 
     /**
      * Initialize the PKI client
      * 
-     * @param url
-     * @param trustStore
+     * @param map of options key/value    
      */
-    void init(String url, KeyStore trustStore);
+    void init(Map<String, Object> options);
 
     /**
      * Determine if the PKI client is initialized

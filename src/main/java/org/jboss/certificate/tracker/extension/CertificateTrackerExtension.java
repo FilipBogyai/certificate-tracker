@@ -6,6 +6,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamConstants;
@@ -17,6 +18,7 @@ import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.SubsystemRegistration;
 import org.jboss.as.controller.descriptions.StandardResourceDescriptionResolver;
+import org.jboss.as.controller.parsing.Attribute;
 import org.jboss.as.controller.parsing.ExtensionParsingContext;
 import org.jboss.as.controller.parsing.ParseUtils;
 import org.jboss.as.controller.persistence.SubsystemMarshallingContext;
@@ -59,9 +61,9 @@ public class CertificateTrackerExtension implements Extension {
     protected static final String ALIASES = "aliases";
     protected static final String PKI_CLIENT = "pki-client";
     protected static final String TIME_INTERVAL = "time-interval";
-    protected static final String TRUSTSTORE_NAME = "truststore-name";
     protected static final String MODULE = "module";
-    protected static final String URL = "url";
+    protected static final String CLIENT_OPTIONS = "client-options";
+    protected static final String CLIENT_OPTION = "client-option";
 
     protected static final PathElement PKI_CLIENT_PATH = PathElement.pathElement(PKI_CLIENT);
     protected static final PathElement KEYSTORE_PATH = PathElement.pathElement(KEYSTORE);
@@ -111,15 +113,9 @@ public class CertificateTrackerExtension implements Extension {
 
                 ModelNode entry = property.getValue();
                 KeystoreDefinition.PATH.marshallAsAttribute(entry, true, writer);
-
-                ModelNode entry2 = property.getValue();
-                KeystoreDefinition.TYPE.marshallAsAttribute(entry2, true, writer);
-
-                ModelNode entry3 = property.getValue();
-                KeystoreDefinition.PASSWORD.marshallAsAttribute(entry3, true, writer);
-
-                ModelNode entry4 = property.getValue();
-                KeystoreDefinition.ALIASES.marshallAsAttribute(entry4, true, writer);
+                KeystoreDefinition.TYPE.marshallAsAttribute(entry, true, writer);
+                KeystoreDefinition.PASSWORD.marshallAsAttribute(entry, true, writer);
+                KeystoreDefinition.ALIASES.marshallAsAttribute(entry, true, writer);
                 writer.writeEndElement();
             }
             writer.writeEndElement();
@@ -132,18 +128,18 @@ public class CertificateTrackerExtension implements Extension {
 
             ModelNode entry = property.getValue();
             PKIClientDefinition.TIME_INTERVAL.marshallAsAttribute(entry, true, writer);
+            PKIClientDefinition.MODULE.marshallAsAttribute(entry, true, writer);
 
-            ModelNode entry2 = property.getValue();
-            PKIClientDefinition.TRUSTSTORE_NAME.marshallAsAttribute(entry2, true, writer);
-
-            ModelNode entry3 = property.getValue();
-            PKIClientDefinition.URL.marshallAsAttribute(entry3, true, writer);
-
-            ModelNode entry4 = property.getValue();
-            PKIClientDefinition.MODULE.marshallAsAttribute(entry4, true, writer);
-
+            if (entry.hasDefined(CLIENT_OPTIONS)) {
+                ModelNode properties = entry.get(CLIENT_OPTIONS);
+                for (Property prop : properties.asPropertyList()){
+                    writer.writeEmptyElement(CLIENT_OPTION);
+                    writer.writeAttribute(Attribute.NAME.getLocalName(), prop.getName());
+                    writer.writeAttribute(Attribute.VALUE.getLocalName(), prop.getValue().asString());
+                    
+                }
+            }
             writer.writeEndElement();
-
             writer.writeEndElement();
         }
 
@@ -173,7 +169,6 @@ public class CertificateTrackerExtension implements Extension {
                 } else {
                     throw ParseUtils.unexpectedElement(reader);
                 }
-
             }
 
         }
@@ -228,26 +223,63 @@ public class CertificateTrackerExtension implements Extension {
                 if (attribute.equals(NAME)) {
                     name = value;
                 } else if (attribute.equals(TIME_INTERVAL)) {
-                    PKIClientDefinition.TIME_INTERVAL.parseAndSetParameter(value, addPKIClientOperation, reader);
-                } else if (attribute.equals(TRUSTSTORE_NAME)) {
-                    PKIClientDefinition.TRUSTSTORE_NAME.parseAndSetParameter(value, addPKIClientOperation, reader);
-                } else if (attribute.equals(URL)) {
-                    PKIClientDefinition.URL.parseAndSetParameter(value, addPKIClientOperation, reader);
+                    PKIClientDefinition.TIME_INTERVAL.parseAndSetParameter(value, addPKIClientOperation, reader);              
                 } else if (attribute.equals(MODULE)) {
                     PKIClientDefinition.MODULE.parseAndSetParameter(value, addPKIClientOperation, reader);
                 } else {
                     throw ParseUtils.unexpectedAttribute(reader, i);
                 }
             }
-            ParseUtils.requireNoContent(reader);
+            
             if (name == null) {
                 throw ParseUtils.missingRequiredElement(reader, Collections.singleton(NAME));
             }
-
+            
+            while(reader.hasNext() && reader.nextTag() != END_ELEMENT){
+                if (reader.getLocalName().equals(CLIENT_OPTION)) {
+                    readPKIClientOption(reader, addPKIClientOperation.get(CLIENT_OPTIONS));
+                } else {
+                    throw ParseUtils.unexpectedElement(reader);
+                }
+            }
+                     
             PathAddress address = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(PKI_CLIENT, name));
             addPKIClientOperation.get(OP_ADDR).set(address.toModelNode());
             list.add(addPKIClientOperation);
         }
-    }
+        
+        private void readPKIClientOption(XMLExtendedStreamReader reader, ModelNode clientOptions) throws XMLStreamException {
+            
+            String name = null;
+            String val = null;
+            EnumSet<Attribute> required = EnumSet.of(Attribute.NAME, Attribute.VALUE);
+            final int count = reader.getAttributeCount();
+            for (int i = 0; i < count; i++) {
 
+                final String value = reader.getAttributeValue(i);
+                final Attribute attribute = Attribute.forName(reader.getAttributeLocalName(i));
+                required.remove(attribute);
+                switch (attribute) {
+                case NAME: {
+                    name = value;
+                    break;
+                }
+                case VALUE: {
+                    val = value;
+                    break;
+                }
+                default:
+                    throw ParseUtils.unexpectedAttribute(reader, i);
+                }
+            }
+
+            if (required.size() > 0) {
+                throw ParseUtils.missingRequired(reader, required);
+            }
+
+            clientOptions.add(name, val);
+            ParseUtils.requireNoContent(reader);
+            
+        }
+    }
 }

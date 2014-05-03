@@ -1,5 +1,6 @@
 package org.jboss.certificate.tracker.extension;
 
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -12,20 +13,19 @@ import org.jboss.msc.service.StopContext;
 
 public class CertificateTrackingService implements Service<CertificateTrackingService> {
 
-    private String url;
-    private final String trustStoreName;
     private long timeInterval;
     private final String name;
     private final String module;
+    private final Map<String, Object> options;
     private Timer timer = null;
 
-    public CertificateTrackingService(String url, String trustStoreName, long timeInterval, String name, String module) {
+    public CertificateTrackingService(String name, long timeInterval, String module, Map<String, Object> options) {
 
-        this.url = url;
-        this.trustStoreName = trustStoreName;
-        this.timeInterval = timeInterval;
         this.name = name;
+        this.timeInterval = timeInterval;
         this.module = module;
+        this.options = options;
+
     }
 
     @Override
@@ -36,6 +36,10 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
     @Override
     public void start(StartContext arg0) throws StartException {
 
+        KeystoresTrackingManager.INSTANCE.setName(name);
+        KeystoresTrackingManager.INSTANCE.setModule(module);
+        KeystoresTrackingManager.INSTANCE.setOptions(options);
+
         if (timeInterval > 0) {
             if (timer == null) {
                 timer = new Timer();
@@ -43,12 +47,9 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    CertificateTrackerLogger.LOGGER.checkingCertificates();
-                    KeystoresTrackingManager.INSTANCE.setUrlTarget(url);
-                    KeystoresTrackingManager.INSTANCE.setTrustStoreManagerName(trustStoreName);
-                    KeystoresTrackingManager.INSTANCE.setName(name);
-                    KeystoresTrackingManager.INSTANCE.setModule(module);
+
                     try {
+                        CertificateTrackerLogger.LOGGER.checkingCertificates();
                         KeystoresTrackingManager.INSTANCE.updateAllKeystores();
                     } catch (Exception ex) {
                         CertificateTrackerLogger.LOGGER.checkingCertificatesError(ex);
@@ -66,14 +67,6 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
 
     public static ServiceName getServiceName() {
         return ServiceName.JBOSS.append("certificate-tracker");
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public long getTimeInterval() {
