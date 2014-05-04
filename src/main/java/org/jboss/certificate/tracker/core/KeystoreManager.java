@@ -1,7 +1,9 @@
 package org.jboss.certificate.tracker.core;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyStore;
@@ -14,6 +16,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
@@ -22,8 +25,7 @@ public class KeystoreManager {
 
     private final String name;
     private final String keystorePath;
-    private final String keystoreType;
-    private final String password;
+    private final char[] password;
     private final KeyStore keystore;
     private final String[] managedAliases;
     private boolean isUpdated;
@@ -42,12 +44,11 @@ public class KeystoreManager {
 
         this.name = name;
         this.keystorePath = keystorePath;
-        this.keystoreType = keystoreType;
-        this.password = password;
+        this.password = password.toCharArray();
         this.managedAliases = managedAliases;
         this.isUpdated = false;
 
-        keystore = KeyStoreUtils.loadKeyStore(keystoreType, keystorePath, password);
+        keystore = loadKeyStore(keystoreType, keystorePath, this.password);
 
     }
 
@@ -58,25 +59,42 @@ public class KeystoreManager {
     public String getKeystorePath() {
         return keystorePath;
     }
+    
+    public boolean isUpdated() {
+        return isUpdated;
+    }
 
     public KeyStore getTrustStore() {
 
         KeyStore trustStore = null;
         try {
-            trustStore = KeyStoreUtils.createTrustStore();
-            KeyStoreUtils.copyCertificates(keystore, trustStore);
+            trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(null, null);
+            copyCertificates(trustStore);
         } catch (Exception ex) {
             CertificateTrackerLogger.LOGGER.unableToCreateTruststore(name, ex);
         }
         return trustStore;
     }
 
-    public String[] getCertAliases() {
-        return KeyStoreUtils.getCertAliases(keystore);
-    }
+    /**
+     * Loads certificate names (aliases) from the initialized keystore
+     * 
+     * @return array of certificate aliases
+     */
+    public String[] getKeystoreAliases() {
 
-    public boolean isUpdated() {
-        return isUpdated;
+        List<String> aliases = new ArrayList<String>();
+        try {
+            Enumeration<String> aliasEnum = keystore.aliases();
+            while (aliasEnum.hasMoreElements()) {
+                aliases.add(aliasEnum.nextElement());
+            }
+        } catch (KeyStoreException ex) {
+            CertificateTrackerLogger.LOGGER.cannotLoadCertificates(ex);
+        }
+
+        return aliases.toArray(new String[aliases.size()]);
     }
 
     public X509Certificate getCertByAlias(String alias) throws KeyStoreException {
@@ -90,7 +108,7 @@ public class KeystoreManager {
     public List<X509Certificate> getAllKeystoreCertificates() throws KeyStoreException {
 
         List<X509Certificate> keystoreCertificates = new ArrayList<X509Certificate>();
-        for (String alias : getCertAliases()) {
+        for (String alias : getKeystoreAliases()) {
             keystoreCertificates.add(getCertByAlias(alias));
         }
         return keystoreCertificates;
@@ -143,7 +161,7 @@ public class KeystoreManager {
 
         File keystoreFile = new File(keystorePath);
         try {
-            keystore.store(new FileOutputStream(keystoreFile), password.toCharArray());
+            keystore.store(new FileOutputStream(keystoreFile), password);
             isUpdated = false;
         } catch (Exception ex) {
             CertificateTrackerLogger.LOGGER.unableToSaveKeystore(name, ex);
@@ -154,7 +172,7 @@ public class KeystoreManager {
     public void setKeyEntryWithCertificate(String alias, X509Certificate newCertificate) throws UnrecoverableKeyException,
             KeyStoreException, NoSuchAlgorithmException {
 
-        Key key = keystore.getKey(alias, password.toCharArray());
+        Key key = keystore.getKey(alias, password);
         PublicKey publicKey = newCertificate.getPublicKey();
         if (key instanceof PrivateKey) {
             KeyPair keyPair = new KeyPair(publicKey, (PrivateKey) key);
@@ -185,7 +203,54 @@ public class KeystoreManager {
                 }
             }
 
-            keystore.setKeyEntry(alias, keyPair.getPrivate(), password.toCharArray(), certChain);
+            keystore.setKeyEntry(alias, keyPair.getPrivate(), password, certChain);
+        }
+    }
+
+    /**
+     * Loads keystore from specified file
+     * 
+     * @param keystoreType
+     * @param keystorePath
+     * @param password
+     * @return keystore
+     */
+    private KeyStore loadKeyStore(String keystoreType, String keystorePath, char[] password) {
+
+        if (keystoreType.isEmpty()) {
+            keystoreType = KeyStore.getDefaultType();
+        }
+
+        KeyStore keyStore = null;
+        InputStream input = null;
+        try {
+            keyStore = KeyStore.getInstance(keystoreType);
+            input = new FileInputStream(keystorePath);
+            keyStore.load(input, password);
+        } catch (Exception ex) {
+            CertificateTrackerLogger.LOGGER.cannotLoadKeystore(ex);
+            return null;
+        } finally {
+            try {
+                input.close();
+            } catch (Exception e) {
+            }
+        }
+        
+        return keyStore;
+    }
+
+    /**
+     * Copies certificates from managed keystore to another (both keystore has
+     * to be initialized.
+     * 
+     * @param toKeyStore
+     * @throws KeyStoreException
+     */
+    private void copyCertificates(KeyStore toKeyStore) throws KeyStoreException {
+
+        for (String alias : getKeystoreAliases()) {
+            toKeyStore.setCertificateEntry(alias, keystore.getCertificate(alias));
         }
     }
 

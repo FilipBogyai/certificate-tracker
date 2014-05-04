@@ -1,7 +1,10 @@
 package org.jboss.certificate.tracker.client;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +15,6 @@ import org.jboss.certificate.tracker.client.dogtag.CertData;
 import org.jboss.certificate.tracker.client.dogtag.CertDataInfo;
 import org.jboss.certificate.tracker.client.dogtag.CertDataInfos;
 import org.jboss.certificate.tracker.core.CertificateInfo;
-import org.jboss.certificate.tracker.core.KeyStoreUtils;
 import org.jboss.certificate.tracker.core.KeystoresTrackingManager;
 import org.jboss.certificate.tracker.core.PKIClient;
 import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
@@ -64,8 +66,24 @@ public class DogtagPKIClient implements PKIClient {
 
         CertData certData = certClient.getCert(Integer.parseInt(id));
         byte[] binaryCertificate = certData.getEncoded().getBytes();
+        // load certificate from binary representation
+        ByteArrayInputStream binStream = null;
+        X509Certificate certificate = null;
+        try {
+            final CertificateFactory certFac = CertificateFactory.getInstance("X.509");
+            binStream = new ByteArrayInputStream(binaryCertificate);
+            certificate = (X509Certificate) certFac.generateCertificate(binStream);
+        } catch (Exception ex) {
+            CertificateTrackerLogger.LOGGER.cannotLoadBinaryCertificate(ex);
+        } finally {
+            try {
+                binStream.close();
+            } catch (IOException ex) {
+                // OK
+            }
+        }
 
-        return KeyStoreUtils.loadBinaryCertificate(binaryCertificate);
+        return certificate;
     }
 
     @Override
