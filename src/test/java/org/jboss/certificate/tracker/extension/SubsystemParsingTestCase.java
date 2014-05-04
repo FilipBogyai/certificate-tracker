@@ -1,7 +1,6 @@
 package org.jboss.certificate.tracker.extension;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIBE;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
@@ -158,33 +157,6 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
         // Install the persisted xml from the first controller into a second
         // controller
         KernelServices servicesB = super.installInController(marshalled);
-        ModelNode modelB = servicesB.readWholeModel();
-
-        // Make sure the models from the two controllers are identical
-        super.compare(modelA, modelB);
-    }
-
-    /**
-     * Starts a controller with the given subsystem xml and then checks that a
-     * second controller started with the operations from its describe action
-     * results in the same model
-     */
-    @Test
-    public void testDescribeHandler() throws Exception {
-        // Parse the subsystem xml and install into the first controller
-        String subsystemXml = "<subsystem xmlns=\"" + CertificateTrackerExtension.NAMESPACE + "\">" + "</subsystem>";
-        KernelServices servicesA = super.installInController(subsystemXml);
-        // Get the model and the describe operations from the first controller
-        ModelNode modelA = servicesA.readWholeModel();
-        ModelNode describeOp = new ModelNode();
-        describeOp.get(OP).set(DESCRIBE);
-        describeOp.get(OP_ADDR).set(
-                PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME)).toModelNode());
-        List<ModelNode> operations = super.checkResultAndGetContents(servicesA.executeOperation(describeOp)).asList();
-
-        // Install the describe options from the first controller into a second
-        // controller
-        KernelServices servicesB = super.installInController(operations);
         ModelNode modelB = servicesB.readWholeModel();
 
         // Make sure the models from the two controllers are identical
