@@ -44,20 +44,20 @@ public class DogtagPKIClient implements PKIClient {
     public static final String TRUSTSTORE_NAME = "truststore-name";
     private CertClient certClient = null;
 
+    /**
+     * Constructor for Dogtag PKI Client
+     */
     public DogtagPKIClient() {
 
     }
 
-    public DogtagPKIClient(String urlTarget) throws URISyntaxException {
-
-        certClient = new CertClient(urlTarget);
-    }
-
-    public DogtagPKIClient(String urlTarget, KeyStore trustStore) throws URISyntaxException {
-
-        certClient = new CertClient(urlTarget, trustStore);
-    }
-
+    /**
+     * Initialize the Dogtag PKI client. It uses "url" option for specifying url
+     * address of Dogtag Certificate system and optional "truststore-name"
+     * option for keystore with trusted certificate
+     * 
+     * @param map of options key/value
+     */
     @Override
     public void init(Map<String, Object> options) {
         try {
@@ -66,44 +66,46 @@ public class DogtagPKIClient implements PKIClient {
             String trustStoreName = (String) options.get(TRUSTSTORE_NAME);
             KeyStore trustStore = KeystoresTrackingManager.INSTANCE.getTrustStore(trustStoreName);
 
-            certClient = trustStore == null ? new CertClient(url) : new CertClient(url, trustStore);
+            certClient = new CertClient(url, trustStore);
 
+        } catch (IllegalArgumentException ex) {
+            CertificateTrackerLogger.LOGGER.urlCannotBeNull(ex);
         } catch (URISyntaxException ex) {
             CertificateTrackerLogger.LOGGER.invalidURL(ex);
         }
     }
 
+    /**
+     * Determine if the Dogtag PKI client is initialized
+     * 
+     * @return boolean
+     */
     @Override
     public boolean isInitialized() {
 
         return certClient != null;
     }
 
+    /**
+     * Get certificate with specified id
+     * 
+     * @param id number of certificate
+     * @return X509Certificate
+     */
     @Override
     public X509Certificate getCertificate(String id) {
 
         CertData certData = certClient.getCert(Integer.parseInt(id));
         byte[] binaryCertificate = certData.getEncoded().getBytes();
-        // load certificate from binary representation
-        ByteArrayInputStream binStream = null;
-        X509Certificate certificate = null;
-        try {
-            final CertificateFactory certFac = CertificateFactory.getInstance("X.509");
-            binStream = new ByteArrayInputStream(binaryCertificate);
-            certificate = (X509Certificate) certFac.generateCertificate(binStream);
-        } catch (Exception ex) {
-            CertificateTrackerLogger.LOGGER.cannotLoadBinaryCertificate(ex);
-        } finally {
-            try {
-                binStream.close();
-            } catch (IOException ex) {
-                // OK
-            }
-        }
 
-        return certificate;
+        return loadBinaryCertificate(binaryCertificate);
     }
 
+    /**
+     * Get information about all available certificates
+     * 
+     * @return Collection<{@link CertificateInfo}>
+     */
     @Override
     public Collection<CertificateInfo> listCertificates() {
 
@@ -125,6 +127,34 @@ public class DogtagPKIClient implements PKIClient {
             certificateInfos.add(keystoreCertificate);
         }
         return certificateInfos;
+    }
+
+    /**
+     * Loads a {@link X509Certificate} from binary representation. Returns null
+     * if the certificate can't be loaded.
+     * 
+     * @param source binary representation of encoded certificate
+     * @return X509Certificate
+     */
+    public X509Certificate loadBinaryCertificate(byte[] source) {
+
+        ByteArrayInputStream binStream = null;
+        X509Certificate cert = null;
+        try {
+            final CertificateFactory certFac = CertificateFactory.getInstance("X.509");
+            binStream = new ByteArrayInputStream(source);
+            cert = (X509Certificate) certFac.generateCertificate(binStream);
+        } catch (Exception ex) {
+            CertificateTrackerLogger.LOGGER.cannotLoadBinaryCertificate(ex);
+        } finally {
+            try {
+                binStream.close();
+            } catch (IOException ex) {
+                // OK
+            }
+        }
+        return cert;
+
     }
 
 }

@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * The CertIdAdapter class provides custom marshaling for CertId.
- *
+ * 
  * @author Endi S. Dewata
  */
 public class CertIdAdapter extends XmlAdapter<String, CertId> {

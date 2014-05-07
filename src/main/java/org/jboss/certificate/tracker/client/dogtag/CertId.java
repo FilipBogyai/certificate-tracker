@@ -21,25 +21,19 @@ package org.jboss.certificate.tracker.client.dogtag;
 import java.math.BigInteger;
 
 /**
- * The CertId class represents the identifier for a particular
- * cert record. This identifier may be used to retrieve the cert record
- * from the database.
- * <p>
- *
+ * Class representing the identifier for a particular certificate record. This
+ * identifier may be used to retrieve the certificate from the database.
+ * 
  * @author Endi S. Dewata
- * @version $Revision$ $Date$
  */
-// TODO: Make a common base class for cert id's and key ids
 public class CertId {
 
     protected BigInteger value;
 
     /**
      * Creates a new CertId from its string representation.
-     * <p>
-     *
-     * @param id
-     *            a string containing the decimal or hex value for the identifier.
+     * 
+     * @param id a string containing the decimal or hex value for the identifier.
      */
     public CertId(String id) {
         if (id != null) {
@@ -54,10 +48,8 @@ public class CertId {
 
     /**
      * Creates a new CertId from its BigInteger representation.
-     * <p>
-     *
-     * @param id
-     *            a BigInteger containing the identifier.
+     * 
+     * @param id a BigInteger containing the identifier.
      */
     public CertId(BigInteger id) {
         value = id;
@@ -65,10 +57,8 @@ public class CertId {
 
     /**
      * Creates a new CertId from its integer representation.
-     * <p>
-     *
-     * @param id
-     *            an integer containing the identifier.
+     * 
+     * @param id an integer containing the identifier.
      */
     public CertId(int id) {
         value = BigInteger.valueOf(id);
@@ -76,22 +66,19 @@ public class CertId {
 
     /**
      * Converts the CertId into its BigInteger representation.
-     * <p>
-     *
-     * @return
-     *         a BigInteger containing the identifier.
+     * 
+     * @return a BigInteger containing the identifier.
      */
     public BigInteger toBigInteger() {
         return value;
     }
 
     /**
-     * Converts the CertId into its string representation. The string
-     * form can be stored in a database (such as the LDAP directory)
-     * <p>
-     *
-     * @return
-     *         a string containing the decimal (base 10) value for the identifier.
+     * Converts the CertId into its string representation. The string form can
+     * be stored in a database (such as the LDAP directory)
+     * 
+     * @return a string containing the decimal (base 10) value for the
+     *         identifier.
      */
     @Override
     public String toString() {
@@ -99,11 +86,10 @@ public class CertId {
     }
 
     /**
-     * Converts the CertId into its hex string representation. The string
-     * form can be stored in a database (such as the LDAP directory)
-     *
-     * @return
-     *         a string containing the hex (hex 16) value for the identifier.
+     * Converts the CertId into its hex string representation. The string form
+     * can be stored in a database (such as the LDAP directory)
+     * 
+     * @return a string containing the hex (hex 16) value for the identifier.
      */
     public String toHexString() {
         return "0x" + value.toString(16);

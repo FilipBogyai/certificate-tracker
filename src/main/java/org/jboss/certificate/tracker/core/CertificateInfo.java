@@ -21,8 +21,9 @@ package org.jboss.certificate.tracker.core;
 import java.util.Date;
 
 /**
- * This class represents certificate information that are obtained by @PKIClient method listCerts 
- * from certificate authority. These information are used for certificate synchronization.  
+ * This class represents certificate information that are obtained by
+ * {@link PKIClient} method listCerts from certificate authority. These
+ * information are used for certificate synchronization.
  * 
  * @author Filip Bogyai
  */

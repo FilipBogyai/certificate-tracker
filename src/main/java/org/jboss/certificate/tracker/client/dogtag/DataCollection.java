@@ -26,6 +26,8 @@ import javax.xml.bind.annotation.XmlElement;
 import org.jboss.resteasy.plugins.providers.atom.Link;
 
 /**
+ * Base class for handling of collection of REST transfer objects
+ * 
  * @author Endi S. Dewata
  */
 public class DataCollection<E> {

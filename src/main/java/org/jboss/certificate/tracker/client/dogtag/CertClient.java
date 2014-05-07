@@ -27,30 +27,30 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
-
+/**
+ * Class representing REST client for Dogtag Certificate System
+ * 
+ * @author Filip Bogyai
+ */
 public class CertClient {
 
-    private final String urlTarget;
-    private final KeyStore truststore;
-    public CertResource certClient;
+    private final CertResource certClient;
 
-    public CertClient(String urlTarget) throws URISyntaxException {
-
-        this.urlTarget = urlTarget;
-        this.truststore = null;
-        init();
-    }
-    
+    /**
+     * Constructor for CertClient, which creates REST client for defined URL target
+     * with optional truststore containing trusted certificate
+     * 
+     * @param urlTarget address of root REST interface of Dogtag 
+     * @param truststore with trusted certificate of Dogtag   
+     */
     public CertClient(String urlTarget, KeyStore truststore) throws URISyntaxException {
 
-        this.urlTarget = urlTarget;
-        this.truststore = truststore;
-        init();
-    }
-
-    public void init() throws URISyntaxException {
+        if (urlTarget == null) {
+            throw new IllegalArgumentException("URL target for Dogtag REST client cannot be null");
+        }
 
         ResteasyClient resteasyClient = null;
+
         if (truststore != null) {
             resteasyClient = new ResteasyClientBuilder().trustStore(truststore).build();
         } else {
@@ -59,28 +59,40 @@ public class CertClient {
 
         ResteasyWebTarget target = resteasyClient.target(urlTarget);
         certClient = target.proxy(CertResource.class);
+
     }
 
+    /**
+     * Get certificate data with specified id
+     * 
+     * @param id number of requested certificate     
+     */
     public CertData getCert(int id) {
         return getCert(new CertId(id));
     }
 
+    /**
+     * Get certificate data with specified id
+     * 
+     * @param id number of requested certificate     
+     */
     public CertData getCert(CertId id) {
         Response response = certClient.getCert(id);
         return response.readEntity(CertData.class);
     }
 
+    /**
+     * Get all information about certificates depending on search criteria
+     * 
+     * @param status of certificate (VALID/REVOKED)
+     * @param maxResults maximal number of returned certificates
+     * @param maxTime end date of certificate validity
+     * @param start id number of first returned certificate  
+     * @param size number of requested certificates
+     */
     public CertDataInfos listCerts(String status, Integer maxResults, Integer maxTime, Integer start, Integer size) {
         Response response = certClient.listCerts(status, maxResults, maxTime, start, size);
         return response.readEntity(CertDataInfos.class);
-    }
-
-    public static void main(String args[]) throws Exception {
-    
-        CertClient service = new CertClient("http://vm-144.idm.lab.eng.brq.redhat.com:8080/ca/rest");
-        
-        CertData data = service.getCert(new CertId(1));
-        System.out.println(data);
     }
 
 }

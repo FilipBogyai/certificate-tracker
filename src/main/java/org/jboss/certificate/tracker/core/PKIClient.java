@@ -41,7 +41,7 @@ public interface PKIClient {
     /**
      * Get certificate with specified id
      * 
-     * @param id
+     * @param id number of certificate
      * @return X509Certificate
      */
     public X509Certificate getCertificate(String id);
@@ -49,7 +49,7 @@ public interface PKIClient {
     /**
      * Get information about all available certificates
      * 
-     * @return Collection<CertificateInfo>
+     * @return Collection<{@link CertificateInfo}>
      */
     public Collection<CertificateInfo> listCertificates();
 

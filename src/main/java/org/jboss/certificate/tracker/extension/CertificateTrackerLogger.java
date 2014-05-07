@@ -104,16 +104,13 @@ public interface CertificateTrackerLogger extends BasicLogger {
     void cannotLoadCertificates(@Cause Throwable cause);
 
     @LogMessage(level = Level.ERROR)
-    @Message(id = 10018, value = "Cannot copy certificates")
-    void cannotCopyCertificates(@Cause Throwable cause);
+    @Message(id = 10018, value = "URL address of Dogtag REST interface cannot be null")
+    void urlCannotBeNull(@Cause Throwable cause);
 
     @LogMessage(level = Level.ERROR)
     @Message(id = 10019, value = "Cannot load keystore")
     void cannotLoadKeystore(@Cause Throwable cause);
 
-    @LogMessage(level = Level.ERROR)
-    @Message(id = 10020, value = "Cannot load CA keystore")
-    void cannotLoadCAKeystore(@Cause Throwable cause);
 
     @LogMessage(level = Level.ERROR)
     @Message(id = 10021, value = "Cannot load certificate")
@@ -123,9 +120,6 @@ public interface CertificateTrackerLogger extends BasicLogger {
     @Message(id = 10022, value = "Cannot load certificate from binary format")
     void cannotLoadBinaryCertificate(@Cause Throwable cause);
 
-    @LogMessage(level = Level.ERROR)
-    @Message(id = 10023, value = "Cannot encrypt with certificate")
-    void cannotEncryptWithCertificate(@Cause Throwable cause);
 
     @LogMessage(level = Level.ERROR)
     @Message(id = 10024, value = "Unable to find PKIClient class")

@@ -33,8 +33,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.jboss.resteasy.plugins.providers.atom.Link;
 
 /**
+ * Class representing REST transfer object for certificate information
+ * 
  * @author alee
- *
  */
 @XmlRootElement(name = "CertDataInfo")
 public class CertDataInfo {
@@ -290,18 +291,4 @@ public class CertDataInfo {
         }
     }
 
-    public static void main(String args[]) throws Exception {
-
-        CertDataInfo before = new CertDataInfo();
-        before.setID(new CertId("12512514865863765114"));
-        before.setSubjectDN("CN=Test User,UID=testuser,O=EXAMPLE-COM");
-        before.setStatus("VALID");
-
-        String string = before.toString();
-        System.out.println(string);
-
-        CertDataInfo after = CertDataInfo.valueOf(string);
-
-        System.out.println(before.equals(after));
-    }
 }

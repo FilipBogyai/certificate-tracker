@@ -23,6 +23,11 @@ import java.util.Collection;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * Class representing collection of REST transfer objects {@link CertDataInfo}
+ * 
+ * @author Endi S. Dewata
+ */
 @XmlRootElement(name = "CertDataInfos")
 public class CertDataInfos extends DataCollection<CertDataInfo> {
 

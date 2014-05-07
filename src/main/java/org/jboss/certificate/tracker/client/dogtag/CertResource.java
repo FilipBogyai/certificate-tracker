@@ -28,9 +28,23 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.annotations.ClientResponseType;
 
+/**
+ * JAX-RS interface for getting certificates from Dogtag Certificate System
+ * 
+ * @author Filip Bogyai
+ */
 @Path("")
 public interface CertResource {
 
+    /**
+     * Get all information about certificates depending on search criteria
+     * 
+     * @param status of certificate (VALID/REVOKED)
+     * @param maxResults maximal number of returned certificates
+     * @param maxTime end date of certificate validity
+     * @param start id number of first returned certificate  
+     * @param size number of requested certificates
+     */
     @GET
     @Path("certs")
     @ClientResponseType(entityType=CertDataInfos.class)
@@ -42,6 +56,11 @@ public interface CertResource {
             @QueryParam("start") Integer start,
             @QueryParam("size") Integer size);
    
+    /**
+     * Get certificate data with specified id
+     * 
+     * @param id number of requested certificate     
+     */
     @GET
     @Path("certs/{id}")
     @ClientResponseType(entityType=CertData.class)
