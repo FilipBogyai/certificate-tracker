@@ -20,7 +20,6 @@ package org.jboss.certificate.tracker.core;
 
 import java.io.IOException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,87 +27,142 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.certificate.tracker.client.DogtagPKIClient;
-import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
 
+/**
+ * This class is responsible for tracking all certificates in managed keystores.
+ * It uses {@link KeystoreManager} for manipulation of certificates in each
+ * keystore. Certificates are synchronized with {@link PKIClient}, which
+ * provides methods for getting actual certificates from Certificate System.
+ * 
+ * @author Filip Bogyai
+ */
 public class KeystoresTrackingManager {
 
     private final List<KeystoreManager> keystoreManagers;
     private PKIClient pkiClient;
-    private String name;
-    private Map<String, Object> options;
-    private String module;
+    private String clientClassName;
+    private Map<String, Object> clientOptions;
+    private String clientModule;
 
+    //This class is Singleton
     public static final KeystoresTrackingManager INSTANCE = new KeystoresTrackingManager();
 
+    /**
+     * Constructor of KeystoresTrackingManager Singleton
+     *     
+     */
     private KeystoresTrackingManager() {
         pkiClient = null;
-        options = null;
+        clientOptions = null;
         keystoreManagers = new ArrayList<KeystoreManager>();
-        name = null;
-        module = null;
+        clientClassName = null;
+        clientModule = null;
     }
     
-    public void setOptions(Map<String, Object> options) {
-        this.options = options;
+    /**
+     * Setter of customizable client options for {@link PKIClient}
+     * 
+     * @param options map of key/value
+     */
+    public void setClientOptions(Map<String, Object> options) {
+        this.clientOptions = options;
     }
     
-    public void setName(String name) {
-        this.name = name;
+    /**
+     * Setter of {@link PKIClient} fully qualified class name  
+     * 
+     * @param clientClassName is a name of class which implements {@link PKIClient}
+     */
+    public void setClientName(String clientClassName) {
+        this.clientClassName = clientClassName;
     }
     
-    public void setModule(String module) {
-        this.module = module;
+    /**
+     * Setter of {@link PKIClient} module
+     * 
+     * @param clientModule is a name of module where the implementation of {@link PKIClient} is
+     */
+    public void setClientModule(String clientModule) {
+        this.clientModule = clientModule;
     }
 
-    private void initPKIClient() {
+    /**
+     * Initializes {@link PKIClient}, which is loaded by provided class name/module.
+     * Then the client is initialized with custom clientOptions.   
+     */
+    public void initPKIClient() {
 
-        if (module == null) {
+        if (clientModule == null) {
 
-            if (name.equals(DogtagPKIClient.DOGTAG)) {
+            if (clientClassName.equals(DogtagPKIClient.DOGTAG)) {
                 pkiClient = new DogtagPKIClient();
                 
             } else {
                 ClassLoader classLoader = KeystoresTrackingManager.class.getClassLoader();
-                pkiClient = PKIClientFactory.get(classLoader, name);
+                pkiClient = PKIClientFactory.get(classLoader, clientClassName);
             }
                
         } else {
-            pkiClient = PKIClientFactory.get(module, name);
+            pkiClient = PKIClientFactory.getFromModule(clientModule, clientClassName);
         }
-        pkiClient.init(options);
+        pkiClient.init(clientOptions);
 
     }
 
-    public KeyStore getTrustStore(String name) {
+    /**
+     * Getter for truststore which is obtained from defined {@link KeystoreManager} 
+     *   
+     * @param name of KeystoreManager from which truststore should be obtained
+     */
+    public KeyStore getTrustStore(String nameOfManager) {
 
-        if (name == null) {
+        if (nameOfManager == null) {
             return null;
         }
 
         for (KeystoreManager manager : keystoreManagers) {
-            if (manager.getName().equals(name)) {
+            if (manager.getName().equals(nameOfManager)) {
                 return manager.getTrustStore();
             }
         }
         return null;
     }
 
+    /**
+     * Adds managed keystore by creating new {@link JavaKeystoreManager}
+     * 
+     * @param name of keystore manager which will be created
+     * @param keystorePath file path of keystore
+     * @param keystoreType type of keystore
+     * @param password of keystore
+     * @param aliases comma separated name of certificate aliases which should be managed
+     */
     public void addKeystore(String name, String keystorePath, String keystoreType, String password, String aliases) {
         
         KeystoreManager keystoreManager;
         if (aliases == null) {
-            keystoreManager = new KeystoreManager(name, keystorePath, keystoreType, password);
+            keystoreManager = new JavaKeystoreManager(name, keystorePath, keystoreType, password);
         } else {
-            keystoreManager = new KeystoreManager(name, keystorePath, keystoreType, password, aliases);
+            keystoreManager = new JavaKeystoreManager(name, keystorePath, keystoreType, password, aliases);
         }
         addKeystoreManager(keystoreManager);
     }
     
+    /**
+     * Adds {@link KeystoreManager} to list of managers
+     *   
+     * @param keystoreManager which will be managed 
+     */
     public void addKeystoreManager(KeystoreManager keystoreManager){
         
         keystoreManagers.add(keystoreManager);
     }
     
+    /**
+     * Removes {@link KeystoreManager} from list of managers
+     *   
+     * @param keystoreManager which will be removed  
+     */
     public void removeKeystoreManager(String name) {
 
         for (KeystoreManager keystoreManager : keystoreManagers) {
@@ -120,6 +174,10 @@ public class KeystoresTrackingManager {
         }
     }
 
+    /**
+     * Compares and updates certificates obtained from {@link PKIClient} with
+     *  each {@link KeystoreManager} in list of managers
+     */
     public void updateAllKeystores() throws IOException {
 
         if (pkiClient == null) {
@@ -129,43 +187,47 @@ public class KeystoresTrackingManager {
         
         for(KeystoreManager manager : keystoreManagers){
             
-            updateCertificates(manager, certificateInfos);
+            updateKeystoreCertificates(manager, certificateInfos);
         }
     }
 
-    public void updateCertificates(KeystoreManager manager, Collection<CertificateInfo> certificateInfos) throws IOException {
+    /**
+     * Compares and updates certificates obtained from {@link PKIClient} with managed certificates 
+     * from single {@link KeystoreManager}. If updated certificate is found, then it is replaced 
+     * in managed keystore.
+     * 
+     *  @param keystoreManager which will be checked for updates
+     *  @param certificateInfos list of all certificate information obtained from {@link PKIClient}
+     * 
+     */
+    public void updateKeystoreCertificates(KeystoreManager manager, Collection<CertificateInfo> certificateInfos) throws IOException {
 
-        List<X509Certificate> managedCertificates = new ArrayList<X509Certificate>();
-        try {
-            managedCertificates = manager.getManagedKeystoreCertificates();
-        } catch (KeyStoreException ex) {
-            CertificateTrackerLogger.LOGGER.unableToLoadCertificates(manager.getName(), ex);
-        }
-        
+        List<X509Certificate> managedCertificates = manager.getManagedCertificates();
+
         for(X509Certificate certificate: managedCertificates){
             for (CertificateInfo certificateInfo : certificateInfos) {
 
                 if (hasSameSubjectDN(certificate, certificateInfo) && isUpdated(certificate, certificateInfo)) {
 
                     X509Certificate newCertificate = pkiClient.getCertificate(certificateInfo.getAlias());
-                    try {
-                        manager.replaceCertificate(certificate, newCertificate);
-                    } catch (Exception ex) {
-                        CertificateTrackerLogger.LOGGER.unableToUpdateCertificate(certificate.getSubjectDN().getName(), 
-                                manager.getName(), ex);
-                    }
+                    manager.replaceCertificate(certificate, newCertificate);
                 }
+
             }
         }
             
-        if (manager.isUpdated()) {
-            manager.saveKeystore();
-            // TODO
-            ServerKeystoreReload.INSTANCE.reloadKeystore(manager.getKeystorePath());
+        if (manager.isChanged()) {
+            manager.saveKeystore();            
+            ServerServicesReload.INSTANCE.reloadDependentServices(manager.getKeystorePath());
         }
 
     }
     
+    /**
+     * Compares Subject name from {@link X509Certificate} with Subject name from {@link CertificateInfo}
+     * 
+     * @return boolean if the name is same
+     */
     public boolean hasSameSubjectDN(X509Certificate certificate, CertificateInfo certificateInfo) {
         
         String subjectDNString = certificate.getSubjectDN().toString().replaceAll(", ", ",");
@@ -173,6 +235,15 @@ public class KeystoresTrackingManager {
 
     }
 
+    /**
+     * Determine if certificate from managed keystore can be updated. This compares information 
+     * from {@link X509Certificate} with {@link CertificateInfo}.
+     * 
+     * @param certificate from managed keystore
+     * @param certificateInfo possible updated version of certificate
+     * 
+     * @return boolean if the updated certificate is available
+     */
     public boolean isUpdated(X509Certificate certificate, CertificateInfo certificateInfo) {
 
         boolean hasLongerValidity = certificate.getNotAfter().compareTo(certificateInfo.getNotValidAfter()) < 0;

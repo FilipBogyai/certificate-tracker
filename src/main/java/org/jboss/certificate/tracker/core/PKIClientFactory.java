@@ -24,8 +24,22 @@ import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 import org.jboss.modules.ModuleLoader;
 
+/**
+ * This class is used for creating new instance of {@link PKIClient} implementation, 
+ * which is loaded by classloader from defined class/module.
+ * 
+ * @author Filip Bogyai
+ */
 public class PKIClientFactory {
 
+    
+    /**
+     * Creates new instance of defined {@link PKIClient} class, 
+     * which is loaded by provided classloader.
+     * 
+     * @param classLoader to use for loading class
+     * @param name fully qualified name of class to load
+     */
     public static PKIClient get(ClassLoader classLoader, String name){
         
         Class<?> loadedClass = null;        
@@ -44,7 +58,14 @@ public class PKIClientFactory {
         return pkiClient;
     }
 
-    public static PKIClient get(String module, String name) {
+    /**
+     * Creates new instance of defined {@link PKIClient} class, 
+     * which is loaded from provided module.
+     * 
+     * @param module where the class is 
+     * @param name fully qualified name of class to load
+     */
+    public static PKIClient getFromModule(String module, String name) {
 
         PKIClient pkiClient = null;
 

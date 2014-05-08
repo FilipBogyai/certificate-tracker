@@ -25,21 +25,21 @@ import java.util.Map;
 public interface PKIClient {
 
     /**
-     * Initialize the PKI client
+     * Initialize the PKI client with customizable options
      * 
      * @param map of options key/value    
      */
     void init(Map<String, Object> options);
 
     /**
-     * Determine if the PKI client is initialized
+     * Determine if the PKI client is initialized.
      * 
-     * @return boolean
+     * @return boolean if the client is initialized
      */
     boolean isInitialized();
 
     /**
-     * Get certificate with specified id
+     * Get certificate with specified id.
      * 
      * @param id number of certificate
      * @return X509Certificate
@@ -49,7 +49,7 @@ public interface PKIClient {
     /**
      * Get information about all available certificates
      * 
-     * @return Collection<{@link CertificateInfo}>
+     * @return Collection<{@link CertificateInfo}> of information about all available certificates.
      */
     public Collection<CertificateInfo> listCertificates();
 

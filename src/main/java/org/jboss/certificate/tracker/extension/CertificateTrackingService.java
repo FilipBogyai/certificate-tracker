@@ -54,9 +54,9 @@ public class CertificateTrackingService implements Service<CertificateTrackingSe
     @Override
     public void start(StartContext arg0) throws StartException {
 
-        KeystoresTrackingManager.INSTANCE.setName(name);
-        KeystoresTrackingManager.INSTANCE.setModule(module);
-        KeystoresTrackingManager.INSTANCE.setOptions(options);
+        KeystoresTrackingManager.INSTANCE.setClientName(name);
+        KeystoresTrackingManager.INSTANCE.setClientModule(module);
+        KeystoresTrackingManager.INSTANCE.setClientOptions(options);
 
         if (timeInterval > 0) {
             if (timer == null) {

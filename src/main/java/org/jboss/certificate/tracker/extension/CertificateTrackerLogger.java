@@ -100,8 +100,8 @@ public interface CertificateTrackerLogger extends BasicLogger {
     void unableToUpdateCertificate(String alias, String keystore, @Cause Throwable cause);
 
     @LogMessage(level = Level.ERROR)
-    @Message(id = 10017, value = "Cannot load certificates")
-    void cannotLoadCertificates(@Cause Throwable cause);
+    @Message(id = 10017, value = "Cannot load keystore aliases")
+    void cannotLoadAliases(@Cause Throwable cause);
 
     @LogMessage(level = Level.ERROR)
     @Message(id = 10018, value = "URL address of Dogtag REST interface cannot be null")
@@ -113,8 +113,8 @@ public interface CertificateTrackerLogger extends BasicLogger {
 
 
     @LogMessage(level = Level.ERROR)
-    @Message(id = 10021, value = "Cannot load certificate")
-    void cannotLoadCertificate(@Cause Throwable cause);
+    @Message(id = 10021, value = "Cannot load certificate with alias: %s from keystore: %s")
+    void cannotLoadCertificate(String alias, String name, @Cause Throwable cause);
 
     @LogMessage(level = Level.ERROR)
     @Message(id = 10022, value = "Cannot load certificate from binary format")

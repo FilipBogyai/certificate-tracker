@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadFactory;
 
 import org.jboss.as.controller.ModelController;
 import org.jboss.as.controller.client.ModelControllerClient;
-import org.jboss.certificate.tracker.core.ServerKeystoreReload;
+import org.jboss.certificate.tracker.core.ServerServicesReload;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.StartContext;
@@ -56,7 +56,7 @@ public class ManagementService implements Service<ManagementService> {
             }
         });
         controllerClient = modelController.getValue().createClient(executor);
-        ServerKeystoreReload.INSTANCE.setManagementClient(controllerClient);
+        ServerServicesReload.INSTANCE.setManagementClient(controllerClient);
     }
 
     @Override

@@ -46,22 +46,45 @@ import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.certificate.tracker.extension.CertificateTrackerLogger;
 import org.jboss.dmr.ModelNode;
 
-public class ServerKeystoreReload {
+/**
+ * This class is used for reloading of services in WildFly. If service uses changed
+ * keystore then reload of keystore is invoked.
+ * 
+ * @author Filip Bogyai
+ */
+public class ServerServicesReload {
 
     private static ModelControllerClient client;
 
-    public static final ServerKeystoreReload INSTANCE = new ServerKeystoreReload();
+    // This class is Singleton
+    public static final ServerServicesReload INSTANCE = new ServerServicesReload();
 
+    /**
+     * Setter of {@link ModelControllerClient}, which is used for managing server
+     * 
+     * @param controllerClient
+     */
     public void setManagementClient(ModelControllerClient controllerClient) {
         client = controllerClient;
     }
     
-    public void reloadKeystore(String keystorePath) throws IOException {
+    /**
+     * Reloads security services, which uses changed keystore.  
+     * 
+     * @param keystorePath file path of changed keystore
+     */
+    public void reloadDependentServices(String keystorePath) throws IOException {
 
         checkSecurityRealms(keystorePath);
         checkSecurityDomains(keystorePath);
     }
-
+    
+    /**
+     * Check all Security Realms if a changed keystore is used. If matching keystore is found 
+     * in any Security Realm, than this service is reloaded.     
+     * 
+     * @param keystorePath file path of changed keystore
+     */
     public void checkSecurityRealms(String keystorePath) throws IOException {
 
         PathAddress address = PathAddress.pathAddress(PathElement.pathElement(CORE_SERVICE, MANAGEMENT));
@@ -139,6 +162,12 @@ public class ServerKeystoreReload {
         CertificateTrackerLogger.LOGGER.debug(result.toString());
     }
 
+    /**
+     * Check all Security Domains if a changed keystore is used. If matching keystore is found 
+     * in any Security Domain, than this service is reloaded.     
+     * 
+     * @param keystorePath file path of changed keystore
+     */
     public void checkSecurityDomains(String keystorePath) throws IOException {
         
         PathAddress address = PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, "security"));
