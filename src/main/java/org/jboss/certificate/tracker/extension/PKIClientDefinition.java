@@ -31,6 +31,11 @@ import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 
+/**
+ * Definition of pki-client element with possible attributes
+ * 
+ * @author Filip Bogyai
+ */
 public class PKIClientDefinition extends SimpleResourceDefinition {
 
     public static final PKIClientDefinition INSTANCE = new PKIClientDefinition();
@@ -68,7 +73,7 @@ public class PKIClientDefinition extends SimpleResourceDefinition {
 
     @Override
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
-        // write attribute for time_interval
+
         resourceRegistration.registerReadWriteAttribute(TIME_INTERVAL, null, PKIClientTimeIntervalHandler.INSTANCE);
         resourceRegistration.registerReadWriteAttribute(CLIENT_OPTIONS, null, new ReloadRequiredWriteAttributeHandler(CLIENT_OPTIONS));       
         resourceRegistration.registerReadWriteAttribute(MODULE, null, new ReloadRequiredWriteAttributeHandler(MODULE));

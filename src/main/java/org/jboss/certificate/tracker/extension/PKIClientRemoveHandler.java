@@ -26,6 +26,11 @@ import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceName;
 
+/**
+ * Handler responsible for removing the pki-client element from the model
+ * 
+ * @author Filip Bogyai
+ */
 public class PKIClientRemoveHandler extends AbstractRemoveStepHandler {
 
     public static final PKIClientRemoveHandler INSTANCE = new PKIClientRemoveHandler();

@@ -23,6 +23,12 @@ import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.dmr.ModelNode;
 
+/**
+ * Handler responsible for changing time period in which certificates are
+ * updated.
+ * 
+ * @author Filip Bogyai
+ */
 public class PKIClientTimeIntervalHandler extends AbstractWriteAttributeHandler<Void> {
 
     public static final PKIClientTimeIntervalHandler INSTANCE = new PKIClientTimeIntervalHandler();

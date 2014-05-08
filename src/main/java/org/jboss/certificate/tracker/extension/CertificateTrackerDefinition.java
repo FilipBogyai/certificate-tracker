@@ -30,7 +30,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceController;
 
 /**
- * Root definition of certificate tracker subsystem
+ * Root definition of certificate-tracker subsystem
  * 
  * @author Filip Bogyai
  */
@@ -40,10 +40,7 @@ public class CertificateTrackerDefinition extends SimpleResourceDefinition {
     private CertificateTrackerDefinition() {
         super(CertificateTrackerExtension.SUBSYSTEM_PATH,
                 CertificateTrackerExtension.getResourceDescriptionResolver(null),
-                //We always need to add an 'add' operation
-                CertificateTrackerAdd.INSTANCE,
-                //Every resource that is added, normally needs a remove operation
-                CertificateTrackerRemove.INSTANCE);
+                CertificateTrackerAdd.INSTANCE, CertificateTrackerRemove.INSTANCE);
     }
 
     /**

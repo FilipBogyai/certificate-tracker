@@ -36,6 +36,11 @@ import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.ServiceName;
 
+/**
+ * Handler responsible for adding the pki-client element to the model
+ * 
+ * @author Filip Bogyai
+ */
 public class PKIClientAddHandler extends AbstractAddStepHandler {
 
     public static PKIClientAddHandler INSTANCE = new PKIClientAddHandler();

@@ -26,6 +26,12 @@ import org.jboss.logging.annotations.LogMessage;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageLogger;
 
+/**
+ * Main logger of certificate-tracker extension, which contains all log messages
+ * with level INFO or higher.
+ * 
+ * @author Filip Bogyai
+ */
 @MessageLogger(projectCode = "CERTRACK")
 public interface CertificateTrackerLogger extends BasicLogger {
 

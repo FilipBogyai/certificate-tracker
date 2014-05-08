@@ -51,6 +51,9 @@ import org.jboss.staxmapper.XMLExtendedStreamWriter;
 
 
 /**
+ * Main entry point for certificate-trakcer extension, which registers subsystem
+ * model. Contains parser for reading and writing configuration.
+ * 
  * @author Filip Bogyai
  */
 public class CertificateTrackerExtension implements Extension {

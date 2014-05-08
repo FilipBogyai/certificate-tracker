@@ -29,6 +29,12 @@ import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 
+/**
+ * Certificate tracking service, which periodically synchronize certificates
+ * with PKI client by calling {@link KeystoresTrackingManager}.
+ * 
+ * @author Filip Bogyai
+ */
 public class CertificateTrackingService implements Service<CertificateTrackingService> {
 
     private long timeInterval;

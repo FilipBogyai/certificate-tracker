@@ -26,6 +26,11 @@ import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 
+/**
+ * Definition of keystore element with possible attributes
+ * 
+ * @author Filip Bogyai
+ */
 public class KeystoreDefinition extends SimpleResourceDefinition {
 
     public static final KeystoreDefinition INSTANCE = new KeystoreDefinition();
@@ -68,9 +73,7 @@ public class KeystoreDefinition extends SimpleResourceDefinition {
 
     @Override
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
-        // write handlers
 
-        // KeystoreTypeHandler.INSTANCE KeystorePasswordHandler.INSTANCE
         resourceRegistration.registerReadWriteAttribute(PATH, null, new ReloadRequiredWriteAttributeHandler(PATH));
         resourceRegistration.registerReadWriteAttribute(TYPE, null, new ReloadRequiredWriteAttributeHandler(TYPE));
         resourceRegistration.registerReadWriteAttribute(PASSWORD, null, new ReloadRequiredWriteAttributeHandler(PASSWORD));

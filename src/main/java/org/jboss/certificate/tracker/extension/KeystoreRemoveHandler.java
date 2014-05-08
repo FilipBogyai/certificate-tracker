@@ -26,6 +26,11 @@ import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.certificate.tracker.core.KeystoresTrackingManager;
 import org.jboss.dmr.ModelNode;
 
+/**
+ * Handler responsible for removing the keystore element from the model
+ * 
+ * @author Filip Bogyai
+ */
 public class KeystoreRemoveHandler extends AbstractRemoveStepHandler{
 
     public static final KeystoreRemoveHandler INSTANCE = new KeystoreRemoveHandler();
@@ -38,7 +43,6 @@ public class KeystoreRemoveHandler extends AbstractRemoveStepHandler{
     protected void performRuntime(final OperationContext context, final ModelNode operation, final ModelNode model)
             throws OperationFailedException {
 
-        // remove keystore manager from service
         String name = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
 
         CertificateTrackerLogger.LOGGER.removingKeystore(name);

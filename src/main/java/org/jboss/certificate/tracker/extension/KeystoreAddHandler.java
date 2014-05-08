@@ -30,6 +30,11 @@ import org.jboss.certificate.tracker.core.KeystoresTrackingManager;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceController;
 
+/**
+ * Handler responsible for adding the keystore element to the model
+ * 
+ * @author Filip Bogyai
+ */
 public class KeystoreAddHandler extends AbstractAddStepHandler {
 
     public static final KeystoreAddHandler INSTANCE = new KeystoreAddHandler();
@@ -59,7 +64,6 @@ public class KeystoreAddHandler extends AbstractAddStepHandler {
         ModelNode aliasesNode = KeystoreDefinition.ALIASES.resolveModelAttribute(context, model);
         String aliases = aliasesNode.isDefined() ? aliasesNode.toString() : null;
 
-        // add keystore manager to service
         CertificateTrackerLogger.LOGGER.addingNewKeystore(name, path);
         KeystoresTrackingManager.INSTANCE.addKeystore(name, path, type, password, aliases);
 

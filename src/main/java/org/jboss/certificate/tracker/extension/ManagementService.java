@@ -32,6 +32,12 @@ import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
 
+/**
+ * Management service is used to obtain model controller for
+ * {@link ServerServicesReload} singleton.
+ * 
+ * @author Filip Bogyai
+ */
 public class ManagementService implements Service<ManagementService> {
 
     public InjectedValue<ModelController> modelController = new InjectedValue<ModelController>();
