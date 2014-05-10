@@ -124,43 +124,53 @@ public class CertificateTrackerExtension implements Extension {
         @Override
         public void writeContent(XMLExtendedStreamWriter writer, SubsystemMarshallingContext context) throws XMLStreamException {
             context.startSubsystemElement(CertificateTrackerExtension.NAMESPACE, false);
-            writer.writeStartElement(KEYSTORES);
-            ModelNode node = context.getModelNode();
-            ModelNode path = node.get(KEYSTORE);
-            for (Property property : path.asPropertyList()) {
 
-                writer.writeStartElement(KEYSTORE);
+            ModelNode node = context.getModelNode();
+
+            if (node.hasDefined(KEYSTORE) && node.get(KEYSTORE).asInt() > 0) {
+
+                writer.writeStartElement(KEYSTORES);
+
+                ModelNode path = node.get(KEYSTORE);
+                for (Property property : path.asPropertyList()) {
+
+                    writer.writeStartElement(KEYSTORE);
+                    writer.writeAttribute(NAME, property.getName());
+
+                    ModelNode entry = property.getValue();
+                    KeystoreDefinition.PATH.marshallAsAttribute(entry, true, writer);
+                    KeystoreDefinition.TYPE.marshallAsAttribute(entry, true, writer);
+                    KeystoreDefinition.PASSWORD.marshallAsAttribute(entry, true, writer);
+                    KeystoreDefinition.ALIASES.marshallAsAttribute(entry, true, writer);
+                    writer.writeEndElement();
+                }
+                writer.writeEndElement();
+            }
+
+
+            if (node.hasDefined(PKI_CLIENT) && node.get(PKI_CLIENT).asInt() > 0) {
+
+                ModelNode name = node.get(PKI_CLIENT);
+                Property property = name.asProperty();
+
+                writer.writeStartElement(PKI_CLIENT);
                 writer.writeAttribute(NAME, property.getName());
 
                 ModelNode entry = property.getValue();
-                KeystoreDefinition.PATH.marshallAsAttribute(entry, true, writer);
-                KeystoreDefinition.TYPE.marshallAsAttribute(entry, true, writer);
-                KeystoreDefinition.PASSWORD.marshallAsAttribute(entry, true, writer);
-                KeystoreDefinition.ALIASES.marshallAsAttribute(entry, true, writer);
+                PKIClientDefinition.TIME_INTERVAL.marshallAsAttribute(entry, true, writer);
+                PKIClientDefinition.MODULE.marshallAsAttribute(entry, true, writer);
+
+                if (entry.hasDefined(CLIENT_OPTIONS)) {
+                    ModelNode properties = entry.get(CLIENT_OPTIONS);
+                    for (Property prop : properties.asPropertyList()) {
+                        writer.writeEmptyElement(CLIENT_OPTION);
+                        writer.writeAttribute(Attribute.NAME.getLocalName(), prop.getName());
+                        writer.writeAttribute(Attribute.VALUE.getLocalName(), prop.getValue().asString());
+
+                    }
+                }
                 writer.writeEndElement();
             }
-            writer.writeEndElement();
-
-            ModelNode name = node.get(PKI_CLIENT);
-            Property property = name.asProperty();
-
-            writer.writeStartElement(PKI_CLIENT);
-            writer.writeAttribute(NAME, property.getName());
-
-            ModelNode entry = property.getValue();
-            PKIClientDefinition.TIME_INTERVAL.marshallAsAttribute(entry, true, writer);
-            PKIClientDefinition.MODULE.marshallAsAttribute(entry, true, writer);
-
-            if (entry.hasDefined(CLIENT_OPTIONS)) {
-                ModelNode properties = entry.get(CLIENT_OPTIONS);
-                for (Property prop : properties.asPropertyList()){
-                    writer.writeEmptyElement(CLIENT_OPTION);
-                    writer.writeAttribute(Attribute.NAME.getLocalName(), prop.getName());
-                    writer.writeAttribute(Attribute.VALUE.getLocalName(), prop.getValue().asString());
-                    
-                }
-            }
-            writer.writeEndElement();
             writer.writeEndElement();
         }
 
