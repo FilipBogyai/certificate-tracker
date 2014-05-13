@@ -36,6 +36,7 @@ import junit.framework.Assert;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.PathElement;
 import org.jboss.as.subsystem.test.AbstractSubsystemTest;
+import org.jboss.as.subsystem.test.AdditionalInitialization;
 import org.jboss.as.subsystem.test.KernelServices;
 import org.jboss.dmr.ModelNode;
 import org.junit.Test;
@@ -127,7 +128,9 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     public void testInstallIntoController() throws Exception {
         // Parse the subsystem xml and install into the controller
         String subsystemXml = getSubsystemXML();
-        KernelServices services = super.installInController(subsystemXml);
+        KernelServices services = createKernelServicesBuilder(AdditionalInitialization.MANAGEMENT)
+                .setSubsystemXml(subsystemXml)
+                .build();
 
         // Read the whole model and make sure it looks as expected
         ModelNode model = services.readWholeModel();
@@ -168,13 +171,17 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     public void testParseAndMarshalModel() throws Exception {
         // Parse the subsystem xml and install into the first controller
         String subsystemXml = getSubsystemXML();
-        KernelServices servicesA = super.installInController(subsystemXml);
+        KernelServices servicesA = createKernelServicesBuilder(AdditionalInitialization.MANAGEMENT)
+                .setSubsystemXml(subsystemXml)
+                .build();
         // Get the model and the persisted xml from the first controller
         ModelNode modelA = servicesA.readWholeModel();
         String marshalled = servicesA.getPersistedSubsystemXml();
         // Install the persisted xml from the first controller into a second
         // controller
-        KernelServices servicesB = super.installInController(marshalled);
+        KernelServices servicesB = createKernelServicesBuilder(AdditionalInitialization.MANAGEMENT)
+                .setSubsystemXml(marshalled)
+                .build();
         ModelNode modelB = servicesB.readWholeModel();
 
         // Make sure the models from the two controllers are identical
@@ -274,7 +281,9 @@ public class SubsystemParsingTestCase extends AbstractSubsystemTest {
     public void testChangeKeystorePassword() throws Exception {
         String subsystemXml = getSubsystemXML();
 
-        KernelServices services = super.installInController(subsystemXml);
+        KernelServices services = createKernelServicesBuilder(AdditionalInitialization.MANAGEMENT)
+                .setSubsystemXml(subsystemXml)
+                .build();
 
         PathAddress exampleAddress = PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, CertificateTrackerExtension.SUBSYSTEM_NAME),
                 PathElement.pathElement("keystore", "example"));
