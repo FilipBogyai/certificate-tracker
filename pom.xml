@@ -22,7 +22,7 @@
 
     <groupId>org.jboss.certificate-tracker</groupId>
     <artifactId>certificate-tracker</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <name> Certificate-Tracker Extension for WildFly </name>
 
